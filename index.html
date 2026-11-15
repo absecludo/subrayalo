@@ -395,7 +395,7 @@ mark.fr-i { background: var(--pen-2); color: var(--pen-ink); border-radius: 4px;
 
 /* ---------- editor (focus mode) ---------- */
 .ed { position: fixed; inset: 0; z-index: 40; background: var(--paper); display: flex; flex-direction: column; }
-.ed-top { display: flex; align-items: center; gap: 14px; padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(max(16px, env(safe-area-inset-right, 0px)) + 64px) 0 max(16px, env(safe-area-inset-left, 0px)); min-height: 52px; }
+.ed-top { display: flex; align-items: center; gap: 14px; padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(max(16px, env(safe-area-inset-right, 0px)) + 110px) 0 max(16px, env(safe-area-inset-left, 0px)); min-height: 52px; }
 .ed-exit { border: 0; background: none; color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 8px; font-size: 15px; }
 .ed-exit:hover { background: var(--paper-2); color: var(--ink); }
 .ed-task { color: var(--ink-2); font-size: 15px; min-width: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
@@ -433,7 +433,13 @@ mark.fr-i { background: var(--pen-2); color: var(--pen-ink); border-radius: 4px;
 .lg.locked .ln { cursor: default; }
 .lg.preview .ln::after { opacity: 0.55; }
 .lg.preview .lb { display: none; }
-.lg.moving { opacity: 0.6; }
+/* under the pointer (drawing, dragging, stretching): no easing, so it never trails behind */
+.lg.live .ln, .lg.live .lb, .lg.live .cn, .lg.live .hd { transition: none; }
+.lg.moving { z-index: 3; }
+.lg.moving .ln { cursor: grabbing; }
+.lg.moving .ln::after { box-shadow: 0 0 0 3px var(--pen-2), 0 3px 10px rgba(34, 71, 194, 0.22); }
+.lg.moving .lb { background: var(--pen-2); box-shadow: 0 2px 8px rgba(34, 71, 194, 0.16); }
+.lg.drop .ln::after { height: 0; top: 7px; background: none; border-top: 2px dashed var(--pen); opacity: 0.7; }
 .lg .hd { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--paper); border: 2px solid var(--pen); pointer-events: auto; cursor: ew-resize; }
 .lg.ok .ln::after { background: var(--ok); }
 .lg.ok .lb { color: var(--ok); }
@@ -495,6 +501,24 @@ mark.fr-i { background: var(--pen-2); color: var(--pen-ink); border-radius: 4px;
 .mk-colors { position: absolute; right: 64px; display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow); }
 .mk-colors button { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
 .mk-colors button[aria-pressed="true"] { border-color: var(--ink); }
+
+/* notes window (top right of the editor): for explanations; they never count for the check */
+.nt { position: absolute; z-index: 8; top: calc(env(safe-area-inset-top, 0px) + 10px); right: max(12px, env(safe-area-inset-right, 0px)); }
+.nt-pill { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px 0 11px; border: 1px solid var(--rule); border-radius: 999px; background: var(--card); color: var(--ink-2); font-size: 15px; font-weight: 600; cursor: pointer; }
+.nt-pill:hover { color: var(--ink); border-color: var(--ink-3); }
+.nt-pill[aria-expanded="true"] { background: var(--pen-2); color: var(--pen-ink); border-color: transparent; }
+.nt-dot { display: none; width: 7px; height: 7px; border-radius: 50%; background: var(--pen); }
+.nt-pill.has .nt-dot { display: block; }
+.nt-win { position: absolute; top: 44px; right: 50px; width: 300px; height: 230px; min-width: 220px; min-height: 140px; max-width: calc(100vw - 100px); max-height: calc(100vh - 150px); display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); box-shadow: var(--shadow); resize: both; overflow: hidden; }
+.nt[data-size="big"] .nt-win { width: min(620px, calc(100vw - 120px)); height: min(460px, calc(100vh - 160px)); }
+.nt-h { display: flex; align-items: center; gap: 2px; padding: 5px 6px 5px 14px; border-bottom: 1px solid var(--rule); }
+.nt-t { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.nt-saved { margin-left: auto; padding-right: 6px; font-size: 13px; color: var(--ok); }
+.nt-b { width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: var(--ink-3); cursor: pointer; }
+.nt-b:hover { background: var(--paper-2); color: var(--ink); }
+.nt-ta { flex: 1; min-height: 0; width: 100%; border: 0; resize: none; outline: none; padding: 10px 14px; background: transparent; color: var(--ink); font-family: var(--f-ui); font-size: 15px; line-height: 1.45; }
+.nt-ta::placeholder { color: var(--ink-3); }
+.nt-f { padding: 0 14px 8px; font-size: 12.5px; color: var(--ink-3); }
 
 /* bottom panel */
 .ed-panel { position: relative; margin: 0 auto calc(env(safe-area-inset-bottom, 0px) + 14px); width: min(760px, calc(100% - 32px - 56px)); max-height: 42vh; display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow); z-index: 5; }
@@ -571,6 +595,10 @@ mark.fr-i { background: var(--pen-2); color: var(--pen-ink); border-radius: 4px;
   .ed-rail { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px); transform: none; flex-direction: column; max-height: calc(100% - 120px); overflow: auto; }
   .ed-panel { width: calc(100% - 24px - 56px); margin-left: 12px; max-height: 46vh; }
   .ed-top { padding-right: 70px; }
+  .nt-pill { width: 40px; padding: 0; justify-content: center; position: relative; }
+  .nt-pill .nt-pt, .nt-size { display: none; }
+  .nt-pill.has .nt-dot { position: absolute; top: 6px; right: 6px; }
+  .nt-win, .nt[data-size="big"] .nt-win { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 56px); left: 12px; right: 12px; width: auto; max-width: none; height: min(46vh, 340px); resize: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
@@ -1248,6 +1276,36 @@ body[data-route="inicio"] main { padding-block: 16px; }
 .ls-k { position: absolute; left: 3px; top: 3px; bottom: 3px; width: calc(50% - 3px); border-radius: 999px; background: var(--ink); transition: transform 0.28s cubic-bezier(0.3, 1.3, 0.5, 1); }
 .lang-sw[aria-checked="true"] .ls-k { transform: translateX(100%); }
 a.preset { color: inherit; text-decoration: none; }
+
+/* ===== Design pass: one calm system. Headings a size smaller, small text big enough to read
+   comfortably, one radius scale (buttons 10px, cards 14px, chips round), cards on the same white,
+   Práctica on one left edge. The animations are untouched. ===== */
+.h1 { font-size: clamp(34px, 4.4vw, 48px); line-height: 1.1; }
+.page-h { gap: 12px; margin-bottom: 30px; }
+.lede { line-height: 1.5; }
+.small { font-size: 15px; }
+.btn { border-radius: 10px; }
+.btn.sm { border-radius: 8px; }
+.chip { font-size: 14.5px; padding: 4px 11px; }
+.card, .side-card, .preset { border-radius: 14px; background: var(--card); }
+.card { padding: 18px 20px; }
+.side-card { padding: 20px 22px; }
+.side-card > b { font-size: 17px; }
+.preset { padding: 18px 20px; gap: 6px; }
+.preset:hover { border-color: var(--pen); background: var(--card); }
+.preset.main, .preset.main:hover { background: var(--pen-2); }
+.preset span { line-height: 1.45; }
+.presets { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.prac-search { margin: -2px 0 36px; max-width: 760px; }
+.prac-search .sbox-pop { gap: 8px; }
+.mq-s { font-weight: 500; color: var(--ink-2); }
+.mq-s.none { color: var(--ink-3); font-weight: 400; font-style: italic; }
+.mq-n small, .mq-s small { font-size: 13.5px; }
+.mq .btn.sm { min-width: 96px; justify-content: center; }
+@media (max-width: 640px) {
+  .presets { grid-template-columns: minmax(0, 1fr); }
+  .page-h { margin-bottom: 24px; }
+}
 </style>
 </head>
 <body>
@@ -1464,6 +1522,10 @@ a.preset { color: inherit; text-decoration: none; }
     globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
     list: '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
     keyboard: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
+    note: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h7M9 16h5"/>',
+    expand: '<path d="M14 4h6v6"/><path d="M20 4l-6.5 6.5"/><path d="M10 20H4v-6"/><path d="M4 20l6.5-6.5"/>',
+    shrink: '<path d="M20 10h-6V4"/><path d="M14 10l6.5-6.5"/><path d="M4 14h6v6"/><path d="M10 14l-6.5 6.5"/>',
+    minus: '<path d="M5 12h14"/>',
   };
   S.icon = (name, size) =>
     `<svg class="ic" width="${size || 20}" height="${size || 20}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[name] || ''}</svg>`;
@@ -4213,28 +4275,84 @@ window.S.addES({
     return { lo: a.length ? Math.max(...a) : 0, hi: b.length ? Math.min(...b) : Infinity };
   };
 
-  // all candidate slots on one side, ordered from the words outwards
+  // all candidate slots on one side, ordered from the words outwards: one per row
+  // («join» when the line fits there, «ins» when what overlaps it there has to move outwards)
   L.slots = (tokens, lines, side, hull, excludeId) => {
     const R = lines.filter((l) => l.side === side && l.id !== excludeId).reduce((m, l) => Math.max(m, l.row), 0);
     const out = [];
-    for (let r = 1; r <= R; r++) {
-      out.push({ type: 'ins', side, row: r });
-      if (L.fits(tokens, lines, side, r, hull, excludeId)) out.push({ type: 'join', side, row: r });
-    }
-    out.push({ type: 'ins', side, row: R + 1 });
+    for (let r = 1; r <= R + 1; r++) out.push({ type: L.fits(tokens, lines, side, r, hull, excludeId) ? 'join' : 'ins', side, row: r });
     return out;
   };
 
-  // put a line into a slot (mutates rows)
-  L.apply = (lines, line, slot) => {
-    if (slot.type === 'ins') {
-      lines.forEach((l) => {
-        if (l !== line && l.side === slot.side && l.row >= slot.row) l.row++;
+  // the lines on one side that sit in a row and overlap a span
+  const at = (tokens, lines, side, row, h, skip) => lines.filter((l) => l !== skip && l.side === side && l.row === row && overlaps(hullOf(tokens, l), h));
+
+  /* Only that column moves: the lines in this line's row that overlap it go one row outwards,
+     whatever they then overlap goes one row further, and so on. Every other line keeps its row. */
+  L.push = (tokens, lines, line) => {
+    const queue = [line];
+    while (queue.length) {
+      const x = queue.shift();
+      at(tokens, lines, x.side, x.row, hullOf(tokens, x), x).forEach((y) => {
+        y.row = x.row + 1;
+        queue.push(y);
       });
     }
+  };
+
+  /* A spot is free again (a line was deleted, moved away or made shorter): the lines just outside it,
+     in that column, move one row in towards the words when they fit there, and so on. */
+  L.pull = (tokens, lines, side, row, hull) => {
+    const queue = [{ row, h: hull }];
+    while (queue.length) {
+      const q = queue.shift();
+      at(tokens, lines, side, q.row + 1, q.h, null)
+        .sort((a, b) => hullOf(tokens, a)[0] - hullOf(tokens, b)[0])
+        .forEach((y) => {
+          const hy = hullOf(tokens, y);
+          if (at(tokens, lines, side, q.row, hy, y).length) return;
+          y.row = q.row;
+          queue.push({ row: q.row + 1, h: hy });
+        });
+    }
+  };
+
+  // put a line into a slot (mutates rows): it takes that row, and only what overlaps it there moves outwards
+  L.apply = (lines, line, slot, tokens) => {
     line.side = slot.side;
-    line.row = slot.row;
+    line.row = Math.max(1, slot.row);
+    L.push(tokens, lines, line);
     L.compress(lines);
+  };
+
+  // take a line out: the lines it had pushed outwards come back in
+  L.remove = (tokens, lines, line) => {
+    const i = lines.indexOf(line);
+    if (i < 0) return;
+    const h = hullOf(tokens, line);
+    lines.splice(i, 1);
+    L.pull(tokens, lines, line.side, line.row, h);
+    L.compress(lines);
+  };
+
+  // a line that grew or shrank: it moves outwards if it now overlaps a line in its row; the space it left closes up
+  L.reshape = (tokens, lines, line, oldHull) => {
+    const h = hullOf(tokens, line);
+    const row = line.row;
+    if (at(tokens, lines, line.side, row, h, line).length) {
+      line.row = row + 1;
+      L.push(tokens, lines, line);
+    }
+    L.pull(tokens, lines, line.side, row, oldHull);
+    L.compress(lines);
+  };
+
+  // while a line is dragged: copies of the other lines, as they are once it has left its place
+  L.lift = (tokens, lines, line) => {
+    const rest = lines.filter((l) => l !== line).map((l) => Object.assign({}, l));
+    L.pull(tokens, rest, line.side, line.row, hullOf(tokens, line));
+    L.compress(rest);
+    return rest;
   };
 
   // remove empty rows, keep order
@@ -4249,14 +4367,16 @@ window.S.addES({
     });
   };
 
-  // display rows with one previewed slot (rows ≥ slot.row move out on insert)
-  L.previewRows = (lines, slot) => {
+  // display rows with one previewed slot: { id: row }, as they would be once a line over `hull` takes it
+  L.previewRows = (tokens, lines, slot, hull) => {
+    const copy = lines.map((l) => Object.assign({}, l));
+    if (slot && hull) {
+      const v = { id: '\u0000pv', _h: hull, side: slot.side, row: Math.max(1, slot.row) };
+      copy.push(v);
+      L.push(tokens, copy, v);
+    }
     const m = {};
-    lines.forEach((l) => {
-      let r = l.row;
-      if (slot && slot.type === 'ins' && l.side === slot.side && l.row >= slot.row) r++;
-      m[l.id] = r;
-    });
+    copy.forEach((l) => (m[l.id] = l.row));
     return m;
   };
 
@@ -5649,9 +5769,9 @@ window.S.addES({
     { id: 'atkinson', name: 'Atkinson Hyperlegible', stack: '"Atkinson Hyperlegible", system-ui, sans-serif', note: 'Designed for easy reading' },
   ];
   const defaults = () => ({
-    settings: { font: 'garamond', size: 'm', side: 'below', clsBox: true, nokb: false, hints: true, theme: 'light', depth: 3, dv: 5, lang: null, updatedAt: 0 },
+    settings: { font: 'garamond', size: 'm', side: 'below', clsBox: true, nokb: false, hints: true, theme: 'light', depth: 3, dv: 5, lang: null, notes: 'min', updatedAt: 0 },
     progress: { attempts: [], topics: {}, steps: {}, sets: {}, seen: {}, ex: {}, updatedAt: 0 },
-    work: { analyses: {}, bank: {}, drafts: {}, inbox: [], usage: {}, updatedAt: 0 },
+    work: { analyses: {}, bank: {}, drafts: {}, notes: {}, inbox: [], usage: {}, updatedAt: 0 },
   });
 
   const store = (S.store = { d: defaults(), mode: 'local', db: null, uid: null });
@@ -5821,7 +5941,7 @@ window.S.addES({
         if (!base.topics[k] || tp[k].n > base.topics[k].n) base.topics[k] = tp[k];
       }));
     } else if (part === 'work') {
-      ['analyses', 'bank', 'drafts'].forEach((k) => (base[k] = mergeMap(loc[k], rem[k], remNewer)));
+      ['analyses', 'bank', 'drafts', 'notes'].forEach((k) => (base[k] = mergeMap(loc[k], rem[k], remNewer)));
       const seenI = new Set();
       base.inbox = (loc.inbox || []).concat(rem.inbox || []).filter((x) => {
         const k = JSON.stringify(x);
@@ -6261,7 +6381,9 @@ window.S.addES({
   function paintButton() {
     const b = document.getElementById('openAccount');
     if (!b) return;
-    b.hidden = false;
+    // the private exam build has no accounts
+    b.hidden = !!S.NO_ACCOUNT;
+    if (S.NO_ACCOUNT) return;
     if (A.user) {
       const ini = (A.user.name || A.user.email || '?').trim().charAt(0).toUpperCase();
       b.innerHTML = `<span class="acct-ini">${esc(ini)}</span><span class="ab-long">${esc(L('Account', 'Cuenta'))}</span>`;
@@ -6289,6 +6411,7 @@ window.S.addES({
       : '';
     return `<p>${L('Log in and your progress is saved to your account, so it’s there on any device. Without logging in it stays in this browser only.', 'Entra y tu progreso se guardará en tu cuenta: lo tendrás en cualquier dispositivo. Sin entrar, solo se queda en este navegador.')}</p>
       ${g}${form}
+      ${g ? `<p class="small muted acct-note acct-school">${A.email ? L('Many schools block their Google accounts on sites they haven’t approved («Access blocked»). If that happens, use a personal Google account, or your email and a password.', 'Muchos colegios bloquean sus cuentas de Google en webs que no han aprobado («Acceso bloqueado»). Si te pasa, usa una cuenta personal de Google o tu correo y una contraseña.') : L('Many schools block their Google accounts on sites they haven’t approved («Access blocked»). If that happens, use a personal Google account.', 'Muchos colegios bloquean sus cuentas de Google en webs que no han aprobado («Acceso bloqueado»). Si te pasa, usa una cuenta personal de Google.')}</p>` : ''}
       <p class="small muted acct-note">${L('We only keep your email and your progress. If you’re under 14, ask your mother, father or guardian before you sign up.', 'Solo guardamos tu correo y tu progreso. Si tienes menos de 14 años, pide permiso a tu madre, padre o tutor antes de registrarte.')}</p>`;
   }
   function loggedIn() {
@@ -7159,6 +7282,7 @@ window.S.addES({
     });
     el.edRail.addEventListener('click', onRail);
     el.edPanel.addEventListener('click', onPanel);
+    if (S.Notes) S.Notes.mount(el.ed);
     el.edStage.addEventListener('scroll', () => {
       S.AC.place();
       placePick();
@@ -7215,6 +7339,8 @@ window.S.addES({
       ui.walk = { order, shown: ctx.showAll ? order.length : 1 };
     }
     el.ed.hidden = false;
+    // the notes window: notes kept with this sentence (they never count for the check)
+    if (S.Notes) S.Notes.open(ctx.text || (ctx.sent && ctx.sent.text) || S.tokensText(st.tokens));
     document.documentElement.style.overflow = 'hidden';
     el.ed.className = 'ed m-' + ctx.mode + ' t-' + ui.tool;
     renderTask();
@@ -7236,6 +7362,7 @@ window.S.addES({
     S.AC.close();
     S.popClose();
     saveNow();
+    if (S.Notes) S.Notes.close();
     el.ed.hidden = true;
     document.documentElement.style.overflow = '';
     const c = ctx;
@@ -7463,7 +7590,7 @@ window.S.addES({
       }
       gEl.dataset.id = d.id;
       gEl.className = 'lg ' + (d.cls || []).join(' ');
-      const y = geo.lineY(d.side, d.row || 1);
+      const y = d.y != null ? d.y : geo.lineY(d.side, d.row || 1);
       const xs = d.pieces.map(([a, b]) => {
         const ta = geo.tx[a];
         const tb = geo.tx[b];
@@ -7503,7 +7630,7 @@ window.S.addES({
       const w = labelWidth(lb, html);
       const cx = best ? (best[0] + best[1]) / 2 : 0;
       const top = d.side === 'below' ? y + 4 : y - 4 - geo.labelH;
-      labels.push({ lb, cx, w, top, key: d.side + (d.row || 1) + (d.cls && d.cls.includes('hidden') ? 'h' : '') });
+      labels.push({ lb, cx, w, top, key: d.y != null ? 'y' + d.id : d.side + (d.row || 1) + (d.cls && d.cls.includes('hidden') ? 'h' : '') });
       gEl.querySelectorAll('.hd').forEach((h) => h.remove());
       if (d.handles) {
         const first = xs[0];
@@ -7574,16 +7701,21 @@ window.S.addES({
     const pv = G && G.mode === 'draw' ? G : ui.kbPv;
     let rows = null;
     let sides = null;
-    if (pv && pv.slot && !pv.addTo) rows = S.lay.previewRows(st.lines, pv.slot);
-    if (G && G.mode === 'move' && G.slot) rows = S.lay.previewRows(st.lines.filter((l) => l.id !== G.id), G.slot);
+    if (pv && pv.slot && !pv.addTo && pv.piece) rows = S.lay.previewRows(st.tokens, st.lines, pv.slot, S.hull(st.tokens, [pv.piece]));
+    // a line being dragged: the others as they are without it, plus the column it would push
+    const mv = G && G.mode === 'move' && G.base ? getLine(G.id) : null;
+    if (mv) rows = S.lay.previewRows(st.tokens, G.base, G.slot, G.slot ? S.hull(st.tokens, mv.pieces) : null);
     if (ui.check) {
       const placed = S.lay.placeGhosts(st.tokens, st.lines, ui.check.ghosts, set().side);
       rows = placed.rows;
       sides = placed.sides;
     }
     st.lines.forEach((l) => {
-      if (G && G.mode === 'move' && G.id === l.id && G.slot) {
-        out.push({ id: l.id, pieces: l.pieces, label: l.label, side: G.slot.side, row: G.slot.row, cls: ['moving', 'sel'], kind: 'user' });
+      if (mv && mv === l) {
+        // it follows the pointer; a dashed line shows where it will land
+        const side = G.slot ? G.slot.side : l.side;
+        out.push({ id: l.id, pieces: l.pieces, label: l.label, side, row: G.slot ? G.slot.row : l.row, y: G.py, cls: ['moving', 'sel', 'live'], kind: 'user' });
+        if (G.slot) out.push({ id: '_drop', pieces: l.pieces, label: '', side: G.slot.side, row: G.slot.row, cls: ['preview', 'drop', 'live'], kind: 'preview' });
         return;
       }
       const cls = [];
@@ -7602,10 +7734,13 @@ window.S.addES({
       }
       let pieces = l.pieces;
       if (pv && pv.addTo === l.id && pv.piece) pieces = l.pieces.concat([pv.piece]);
-      if (G && G.mode === 'stretch' && G.id === l.id && G.pieces) pieces = G.pieces;
+      if (G && G.mode === 'stretch' && G.id === l.id && G.pieces) {
+        pieces = G.pieces;
+        cls.push('live');
+      }
       out.push({ id: l.id, pieces, label: l.label, html, side: sides ? sides[l.id] || l.side : l.side, row: rows && rows[l.id] != null ? rows[l.id] : l.row, cls, kind: 'user', handles: ui.sel === l.id && editable() && !l.locked && !ui.check && !ui.editing });
     });
-    if (pv && pv.slot && !pv.addTo && pv.piece) out.push({ id: '_pv', pieces: [pv.piece], label: '', side: pv.slot.side, row: pv.slot.row, cls: ['preview'], kind: 'preview' });
+    if (pv && pv.slot && !pv.addTo && pv.piece) out.push({ id: '_pv', pieces: [pv.piece], label: '', side: pv.slot.side, row: pv.slot.row, cls: ['preview', 'live'], kind: 'preview' });
     if (ui.check)
       ui.check.ghosts.forEach((gh) => {
         const c = ['ghost', gh.kind];
@@ -7735,14 +7870,15 @@ window.S.addES({
     return [st.tokens[i].id, st.tokens[j].id];
   }
 
-  // where a line goes for a pointer height
-  function slotAt(y, hull, excludeId) {
+  // where a line goes for a pointer height (base: the other lines while one is dragged)
+  function slotAt(y, hull, excludeId, base) {
     const g = geo;
+    const src = base || st.lines;
     // on the words, or close to them (a finger lands a little above): the usual side, next to the others
     const band = Math.max(8, Math.min(18, (g.sentH || 30) * 0.45));
-    if (y >= g.textTop - band && y <= g.textBottom + band) return S.lay.smartSlot(st.tokens, st.lines, set().side, hull, excludeId);
+    if (y >= g.textTop - band && y <= g.textBottom + band) return S.lay.smartSlot(st.tokens, src, set().side, hull, excludeId);
     const side = y < g.textTop ? 'above' : 'below';
-    const lines = st.lines.filter((l) => l.id !== excludeId);
+    const lines = src.filter((l) => l.id !== excludeId);
     const R = S.lay.rowsOf(lines, side);
     const cands = [];
     for (let r = 1; r <= R + 1; r++) {
@@ -7765,15 +7901,9 @@ window.S.addES({
         best = c;
       }
     });
-    // a NEW line only opens a new row when it would overlap: otherwise it sits in the row
-    // next to the pointer, beside the lines already there
-    if (!excludeId && best.type === 'ins') {
-      const b = S.lay.bounds(st.tokens, lines, side, hull, null);
-      for (const r of [best.row, best.row - 1]) {
-        if (r >= 1 && r <= R && r > b.lo && r < b.hi && S.lay.fits(st.tokens, lines, side, r, hull, null)) return { type: 'join', side, row: r };
-      }
-      return S.lay.smartSlot(st.tokens, st.lines, side, hull, null);
-    }
+    // a NEW line goes as close to the words as it can on that side, just outside the lines it contains,
+    // so there is never a gap between the words and it; only a dragged line lands exactly where it is dropped
+    if (!excludeId) return S.lay.smartSlot(st.tokens, st.lines, side, hull, null);
     return best;
   }
 
@@ -7898,7 +8028,16 @@ window.S.addES({
     G.piece = piece(G.a, G.b);
     if (G.addTo) G.slot = null;
     else G.slot = slotAt(p.y, S.hull(st.tokens, [G.piece]), null);
-    place();
+    schedulePlace();
+  }
+  // pointer moves come faster than the screen: draw at most once a frame
+  let placeRaf = 0;
+  function schedulePlace() {
+    if (placeRaf) return;
+    placeRaf = requestAnimationFrame(() => {
+      placeRaf = 0;
+      if (ctx && geo) place();
+    });
   }
 
   function onMove(e) {
@@ -7933,12 +8072,16 @@ window.S.addES({
       }
       G.mode = 'move';
       ui.sel = G.id;
+      // the other lines as they are once this one has left its place; the grab point stays under the pointer
+      G.base = S.lay.lift(st.tokens, st.lines, ln);
+      G.hull = S.hull(st.tokens, ln.pieces);
+      G.dy = G.y0 - geo.lineY(ln.side, ln.row);
       capture(G.pid);
     }
     if (G.mode === 'move') {
-      const ln = getLine(G.id);
-      G.slot = slotAt(p.y, S.hull(st.tokens, ln.pieces), G.id);
-      place();
+      G.py = p.y - G.dy;
+      G.slot = slotAt(G.py, G.hull, G.id, G.base);
+      schedulePlace();
       return;
     }
     if (G.mode === 'stretchDown') {
@@ -7952,7 +8095,7 @@ window.S.addES({
       if (G.end === 'a') pcs[0] = piece(c, pcs[0][1]);
       else pcs[pcs.length - 1] = piece(pcs[pcs.length - 1][0], c);
       G.pieces = mergePieces(pcs);
-      place();
+      schedulePlace();
       autoScroll(e);
       return;
     }
@@ -8009,9 +8152,16 @@ window.S.addES({
       return;
     }
     if (g.mode === 'move') {
-      if (g.slot) {
+      const ln = getLine(g.id);
+      if (g.slot && ln && g.base) {
         pushUndo();
-        S.lay.apply(st.lines, getLine(g.id), g.slot);
+        // the others take the rows they had without it; then it lands, and only its column makes room
+        const base = {};
+        g.base.forEach((l) => (base[l.id] = l.row));
+        st.lines.forEach((l) => {
+          if (l !== ln && base[l.id] != null) l.row = base[l.id];
+        });
+        S.lay.apply(st.lines, ln, g.slot, st.tokens);
         changed();
       } else place();
       return;
@@ -8020,8 +8170,9 @@ window.S.addES({
       if (g.pieces) {
         pushUndo();
         const ln = getLine(g.id);
+        const old = S.hull(st.tokens, ln.pieces);
         ln.pieces = g.pieces;
-        if (!S.lay.fits(st.tokens, st.lines, ln.side, ln.row, S.hull(st.tokens, ln.pieces), ln.id)) S.lay.apply(st.lines, ln, { type: 'ins', side: ln.side, row: ln.row + 1 });
+        S.lay.reshape(st.tokens, st.lines, ln, old);
         changed();
       } else place();
       return;
@@ -8074,7 +8225,7 @@ window.S.addES({
     pushUndo();
     const ln = { id: S.uid('l'), pieces: [pc], label: '', side: slot.side, row: slot.row };
     st.lines.push(ln);
-    S.lay.apply(st.lines, ln, slot);
+    S.lay.apply(st.lines, ln, slot, st.tokens);
     ui.sel = ln.id;
     ui.kbPv = null;
     justCreated = ln.id;
@@ -8097,17 +8248,19 @@ window.S.addES({
     const ln = getLine(id);
     if (!ln) return;
     pushUndo();
+    const old = S.hull(st.tokens, ln.pieces);
     ln.pieces = mergePieces(ln.pieces.concat([pc]));
-    if (!S.lay.fits(st.tokens, st.lines, ln.side, ln.row, S.hull(st.tokens, ln.pieces), ln.id)) S.lay.apply(st.lines, ln, { type: 'ins', side: ln.side, row: ln.row + 1 });
+    S.lay.reshape(st.tokens, st.lines, ln, old);
     ui.addPieceTo = null;
     ui.sel = id;
     changed();
   }
 
+  // the lines it had pushed outwards come back in towards the words
   function removeLine(id) {
-    st.lines = st.lines.filter((l) => l.id !== id);
+    const ln = getLine(id);
+    if (ln) S.lay.remove(st.tokens, st.lines, ln);
     if (ui.sel === id) ui.sel = null;
-    S.lay.compress(st.lines);
   }
 
   function unmark(id) {
@@ -8654,7 +8807,7 @@ window.S.addES({
     const list = kbSlots(hull);
     if (ui.kb.slot == null) {
       const sm = S.lay.smartSlot(st.tokens, st.lines, set().side, hull, null);
-      ui.kb.slot = Math.max(0, list.findIndex((s) => s.type === sm.type && s.side === sm.side && s.row === sm.row));
+      ui.kb.slot = Math.max(0, list.findIndex((s) => s.side === sm.side && s.row === sm.row));
     }
     ui.kb.slot = S.clamp(ui.kb.slot, 0, list.length - 1);
     ui.kbPv = { piece: pc, slot: list[ui.kb.slot] };
@@ -8801,7 +8954,8 @@ window.S.addES({
       B.push('<div class="sep"></div>');
       if (ui.keySent) {
         if (!ui.keySent.ai) B.push(btn('hint', 'hint', 'Hint: draw the next missing line'));
-        B.push(btn('check', 'check', 'Check my analysis', { cls: 'primary' }));
+        // pressed while the correction shows: pressing it again goes back to editing
+        B.push(btn('check', 'check', ui.check ? 'Keep editing' : 'Check my analysis', { cls: 'primary', pressed: !!ui.check }));
         B.push(btn('solution', 'eye', ui.showKey ? 'Back to my analysis' : 'Show the solution', { pressed: ui.showKey }));
       } else if (S.sample || S.aiCheck) B.push(btn('ai', 'sparkle', 'Ask Claude to check', { cls: 'primary' }));
     } else B.push(btn('try', 'pencil', 'Try it yourself'));
@@ -8851,7 +9005,7 @@ window.S.addES({
     }
     if (a === 'undo') return doUndo();
     if (a === 'redo') return doRedo();
-    if (a === 'check') return doCheck();
+    if (a === 'check') return ui.check ? keepEditing() : doCheck();
     if (a === 'hint') return doHint();
     if (a === 'solution') return toggleSolution();
     if (a === 'ai') return doAI();
@@ -8975,12 +9129,7 @@ window.S.addES({
     if (a === 'wall') return walkStep(99);
     if (a === 'try') return tryIt();
     if (a === 'solution') return toggleSolution();
-    if (a === 'retry') {
-      ui.check = null;
-      renderPanel();
-      layout();
-      return;
-    }
+    if (a === 'retry') return keepEditing();
     if (a === 'next') return ctx.onNext && ctx.onNext(ui.check);
     if (a === 'min') {
       ui.panelMin = !ui.panelMin;
@@ -9075,6 +9224,14 @@ window.S.addES({
     if (ctx.onChecked) ctx.onChecked(r, { hints: ui.hints, peeked: ui.peeked });
   }
 
+  // hide the correction and go back to the drawing (the check button, pressed again, or «Keep editing»)
+  function keepEditing() {
+    ui.check = null;
+    renderPanel();
+    renderRail();
+    layout();
+  }
+
   function doHint() {
     if (!ui.keySent) return;
     commitLabel(true);
@@ -9087,7 +9244,7 @@ window.S.addES({
     const need = scopedLines(ui.keySent);
     const ln = { id: S.uid('l'), pieces: S.deep(k.pieces), label: need && need.has(k.id) ? need.get(k.id) : S.keyLabel(k), side: set().side, row: 1, hint: true };
     st.lines.push(ln);
-    S.lay.apply(st.lines, ln, S.lay.smartSlot(st.tokens, st.lines, set().side, S.hull(st.tokens, ln.pieces), ln.id));
+    S.lay.apply(st.lines, ln, S.lay.smartSlot(st.tokens, st.lines, set().side, S.hull(st.tokens, ln.pieces), ln.id), st.tokens);
     ui.hints++;
     ui.check = null;
     changed();
@@ -9285,6 +9442,146 @@ Reply with only JSON: {"key": "[ocomp …]", "cls": ["g-comp", "…"], "notes": 
       }
     }, 'image/png');
   }
+})();
+
+/* ===== Notes: a small window in the editor for notes on the sentence =====
+   For explanations (a teacher's, or your own). They never count for the check.
+   Saved per sentence with the rest of your work, so they are there next time (and in your account).
+   The window: a «Notas» button in the top right corner opens it; it can be made bigger, or minimised again. */
+(function () {
+  const S = window.S;
+  const N = (S.Notes = {});
+  const el = {};
+  let key = null;
+  let label = '';
+  const W = () => S.store.d.work;
+  const set = () => S.store.d.settings;
+  const size = () => (set().notes === 'open' || set().notes === 'big' ? set().notes : 'min');
+  const hash = (s) => {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+    return (h >>> 0).toString(36);
+  };
+  // the same sentence gets the same notes, however it was opened (capitals, accents and punctuation aside)
+  N.keyFor = (text) =>
+    'n' +
+    hash(
+      S.norm(String(text || ''))
+        .replace(/[^a-z0-9ñü ]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+    );
+  const stored = () => (key && W().notes && W().notes[key] ? W().notes[key].text || '' : '');
+
+  function save() {
+    if (!key) return;
+    const w = W();
+    w.notes = w.notes || {};
+    const v = el.ta.value;
+    const had = w.notes[key];
+    if (!v.trim() && !had) return;
+    // an emptied note stays as an empty record, so the account doesn't bring the old text back
+    w.notes[key] = { text: v, s: label.slice(0, 140), updatedAt: Date.now() };
+    S.store.save('work');
+    el.saved.textContent = S.L('Saved', 'Guardado');
+    clearTimeout(save.t);
+    save.t = setTimeout(() => (el.saved.textContent = ''), 1600);
+    paint();
+  }
+  const saveLater = S.debounce(save, 500);
+
+  function paint() {
+    if (!el.box) return;
+    const sz = size();
+    const has = !!stored().trim();
+    el.box.dataset.size = sz;
+    el.win.hidden = sz === 'min';
+    el.pill.setAttribute('aria-expanded', String(sz !== 'min'));
+    el.pill.classList.toggle('has', has);
+    el.pill.querySelector('.nt-pt').textContent = S.L('Notes', 'Notas');
+    el.title.textContent = S.L('Notes', 'Notas');
+    el.ta.placeholder = S.L('Write explanations or reminders here. They don’t count for the check.', 'Escribe aquí explicaciones o recordatorios. No cuentan para la corrección.');
+    el.foot.textContent = S.L('Saved with this sentence', 'Se guarda con esta oración');
+    el.ta.setAttribute('aria-label', S.L('Notes', 'Notas'));
+    const big = sz === 'big';
+    // only when it changes: replacing the icon under a click would swallow that click
+    if (el.sizeB._big !== big) {
+      el.sizeB.innerHTML = S.icon(big ? 'shrink' : 'expand', 16);
+      el.sizeB._big = big;
+    }
+    el.sizeB.setAttribute('aria-label', big ? S.L('Make smaller', 'Hacer más pequeño') : S.L('Make bigger', 'Hacer más grande'));
+    el.sizeB.dataset.tip = el.sizeB.getAttribute('aria-label');
+    el.minB.setAttribute('aria-label', S.L('Minimise', 'Minimizar'));
+    el.minB.dataset.tip = el.minB.getAttribute('aria-label');
+  }
+  function setSize(sz) {
+    if (size() === 'min' && sz === 'min') return;
+    if (sz === 'min') save();
+    set().notes = sz;
+    S.store.save('settings');
+    el.win.style.width = '';
+    el.win.style.height = '';
+    paint();
+    if (sz !== 'min') setTimeout(() => el.ta.focus({ preventScroll: true }), 0);
+  }
+
+  N.mount = (root) => {
+    if (el.box) return;
+    el.box = S.h('div.nt', { id: 'edNotes' });
+    el.pill = S.h('button.nt-pill', { type: 'button', 'aria-controls': 'edNotesWin' });
+    el.pill.innerHTML = S.icon('note', 17) + '<span class="nt-pt"></span><span class="nt-dot" aria-hidden="true"></span>';
+    el.win = S.h('section.nt-win', { id: 'edNotesWin' });
+    const head = S.h('div.nt-h');
+    el.title = S.h('b.nt-t');
+    el.saved = S.h('span.nt-saved', { 'aria-live': 'polite' });
+    el.sizeB = S.h('button.nt-b.nt-size', { type: 'button' });
+    el.minB = S.h('button.nt-b', { type: 'button', html: S.icon('minus', 16) });
+    head.append(el.title, el.saved, el.sizeB, el.minB);
+    el.ta = S.h('textarea.nt-ta', { spellcheck: 'true', 'aria-label': 'Notes' });
+    el.foot = S.h('p.nt-f');
+    el.win.append(head, el.ta, el.foot);
+    el.box.append(el.pill, el.win);
+    root.append(el.box);
+    el.pill.addEventListener('click', () => setSize(size() === 'min' ? 'open' : 'min'));
+    el.sizeB.addEventListener('click', () => setSize(size() === 'big' ? 'open' : 'big'));
+    el.minB.addEventListener('click', () => setSize('min'));
+    el.ta.addEventListener('input', saveLater);
+    el.ta.addEventListener('blur', save);
+    el.ta.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setSize('min');
+        el.pill.focus();
+      }
+    });
+    // the editor draws underneath: clicks and keys here stay in the window
+    el.box.addEventListener('pointerdown', (e) => e.stopPropagation());
+    el.box.hidden = true;
+  };
+
+  // show the notes of a sentence (its text)
+  N.open = (text) => {
+    if (!el.box) return;
+    key = N.keyFor(text);
+    label = String(text || '');
+    el.ta.value = stored();
+    el.saved.textContent = '';
+    el.box.hidden = false;
+    paint();
+  };
+  N.close = () => {
+    if (!el.box) return;
+    save();
+    key = null;
+    el.box.hidden = true;
+  };
+  N.refresh = () => {
+    if (key && document.activeElement !== el.ta) el.ta.value = stored();
+    paint();
+  };
+  N.text = () => stored();
+  // the account brought newer notes while the window is open
+  S.on('store-changed', () => key && N.refresh());
 })();
 
 /* sentence bank files: data/bank/*.json */
@@ -11943,7 +12240,8 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
     const i = h.indexOf('-');
     const base = i < 0 ? h : h.slice(0, i);
     const arg = i < 0 ? '' : h.slice(i + 1);
-    return V.routes[base] ? { base, arg } : { base: 'inicio', arg: '' };
+    // S.HOME: another start page (the private exam build opens on its exam)
+    return V.routes[base] ? { base, arg } : { base: S.HOME || 'inicio', arg: '' };
   }
   V.render = (keepScroll) => {
     const r = parse();
@@ -12669,7 +12967,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
             ${ex ? `<p class="frc-ex-s small muted">${esc(ex.s.text)}</p><p class="frc-ex es">${fraseHtml(ex.fr, 0, null)}</p>` : ''}
             ${f.vars.map(([n, v]) => `<p class="frc-var"><span class="small muted">${esc(n)}</span><span class="es">${patHtml(v)}</span></p>`).join('')}
           </details>` : ''}
-          ${drillPool(f.id).length ? `<div class="row"><button type="button" class="btn sm" data-drill="${f.id}">Practice it ×${Math.min(5, drillPool(f.id).length)}</button></div>` : ''}
+          ${drillPool(f.id).length ? `<div class="row"><button type="button" class="btn sm ghost" data-drill="${f.id}">Practice it ×${Math.min(5, drillPool(f.id).length)}</button></div>` : ''}
         </li>`;
       }).join('')}</ol>`;
   }
@@ -13148,6 +13446,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
     V.go('practica');
     show();
   }
+  P.start = start;
   P.startCustom = () => {
     const c = cfg();
     const items = pool(c);
@@ -13465,7 +13764,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
     const sel = c.topics ? new Set(c.topics) : null;
     const on = (id) => !sel || sel.has(id);
     const search = S.Search ? S.Search : null;
-    const head = `<div class="page-h prac-h"><p class="eyebrow">${esc(_('Práctica'))}</p><h1 class="h1">${esc(_('Practice'))}</h1>
+    const head = `<div class="page-h prac-h"><p class="eyebrow">${esc(_('Práctica'))}</p><h1 class="h1">${esc(S.L('Practice any kind of sentence', 'Practica cualquier tipo de oración'))}</h1>
         <p class="lede">${esc(_('Search any topic and work through its sentences one after another, or pick an exercise below. Every answer is checked and explained.'))}</p></div>
       ${search ? `<div class="prac-search">${search.box('prac')}${search.facets.length ? '' : search.popular()}</div>` : ''}`;
     if (search && search.facets.length) {
@@ -14141,7 +14440,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
   };
 
   // the most asked-for topics, as chips under the search bar
-  const POPULAR = ['osimple', 'oss', 'osr', 'oadv', 'ocoord', 'cd', 'ci', 'creg', 'cpred', 'cag', 'atrib', 'imp', 'pasref', 'perif'];
+  const POPULAR = ['osimple', 'oss', 'osr', 'ocoord', 'cd', 'creg', 'atrib', 'imp', 'perif'];
 
   // ---- the search bar ----
   Q.box = (where) => `<form class="sbox sbox-${where}" data-sbox="${where}" role="search" autocomplete="off">
@@ -15317,13 +15616,13 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
     const last = a.slice(-5);
     const avg = last.length ? Math.round(last.reduce((s, x) => s + x.pct, 0) / last.length) : null;
     const cls = avg == null ? '' : avg >= 85 ? 'good' : avg >= 55 ? 'mid' : 'low';
-    const P_ = esc(_('Practice'));
+    const P_ = esc(S.L('Practice', 'Practicar'));
     const btn = go.href ? `<a class="btn sm quiet" href="${go.href}">${P_}</a>` : go.act ? `<button type="button" class="btn sm quiet" data-act="put" data-set="${go.set}">${P_}</button>` : `<button type="button" class="btn sm quiet" data-act="prac-type" data-ty="${go.ty}" data-name="${esc(name)}">${P_}</button>`;
     return `<div class="mq">
       <span class="mq-q">${q}</span>
       <span class="mq-n">${esc(name)}${pts ? `<small>${String(pts).replace('.', ',')} p</small>` : ''}</span>
       <span class="mq-bar ${cls}" title="${esc(avg == null ? _('Not practised yet') : _('Last {k}: {p}%', { k: last.length, p: avg }))}"><i style="width:${avg || 0}%"></i></span>
-      <span class="mq-s">${avg == null ? esc(_('not yet')) : avg + '%'}<small>${a.length ? esc(a.length === 1 ? _('1 try') : _('{n} tries', { n: a.length })) : ''}</small></span>
+      <span class="mq-s${avg == null ? ' none' : ''}">${avg == null ? esc(_('not yet')) : avg + '%'}<small>${a.length ? esc(a.length === 1 ? _('1 try') : _('{n} tries', { n: a.length })) : ''}</small></span>
       ${btn}
     </div>`;
   };
