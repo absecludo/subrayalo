@@ -3050,6 +3050,8 @@ window.S.addES({
  "More sentences, with other topics inside": "Más oraciones, con otros temas dentro",
  "Log in / Sign up": "Entrar / Registrarse",
  "Under the sentence: write O. simple or O. compuesta and the sujeto omitido. The rest (modality, transitive…) is optional and doesn’t change your score.": "Debajo de la oración: escribe O. simple u O. compuesta y el sujeto omitido. Lo demás (modalidad, transitiva…) es opcional y no cambia tu nota.",
+ "Claude’s check isn’t switched on for this website yet.": "La revisión de Claude todavía no está activada en esta web.",
+ "Claude’s check isn’t fully set up on this website yet.": "La revisión de Claude todavía no está configurada del todo en esta web.",
  "Back": "Volver",
  "Start here": "Empieza aquí",
  "Every topic in order →": "Todos los temas en orden →",
@@ -4644,6 +4646,14 @@ window.S.addES({
   const EXCL = ['size', 'copl', 'trans', 'voice', 'imp', 'modal'];
 
   S.keyLabel = (k) => S.fmtLabel(k.reqs.map((r) => r.alts[0]));
+  // a line of an analysis written by Claude (Tu oración): classification tags out, «group optional by default»
+  // kept as in the bank, and a predicate always gets its SV («(SV) PV»), which Claude sometimes leaves out
+  S.aiReqs = (reqs) => {
+    const out = reqs.map((r) => ({ alts: r.alts.filter((a) => S.T[a] && S.T[a].k !== 'tag'), opt: r.opt, dp: r.dp })).filter((r) => r.alts.length);
+    const pred = out.some((r) => r.alts.some((a) => ['pv', 'pn', 'p'].includes(a)));
+    if (pred && !out.some((r) => r.alts.some((a) => S.T[a].k === 'phrase'))) out.push({ alts: ['sv'], opt: true, dp: true });
+    return out;
+  };
 
   /* ---- What has been taught so far (a Teoría topic and the ones before it) ----
      known: a Set of term ids and a few concept ids (groups, relfn…). A requirement outside it
@@ -4873,6 +4883,18 @@ window.S.addES({
       if (sp && sp.main === 'adv') return id === 'sadv' || id === 'sprep';
       return false;
     };
+    // the group of a key line that doesn't name one (an analysis from Claude can leave it out): a predicate
+    // is an SV, a line that starts with its own Enlace is an SPrep, otherwise the class of its one-word núcleo says
+    const groupOfLine = (k) => {
+      const hasId = (x, ids) => x.reqs.some((r) => r.alts.some((a) => ids.includes(a)));
+      if (hasId(k, ['pv', 'pn', 'p'])) return 'sv';
+      const kids = keys.filter((c) => c.parent === k.id);
+      if (kids.some((c) => hasId(c, ['e']) && c.atoms[0] === k.atoms[0])) return 'sprep';
+      const n = kids.find((c) => hasId(c, ['n']) && c.atoms.length === 1);
+      if (!n) return null;
+      const e = WC.at.get(n.atoms[0]);
+      return S.phraseOfWord(sent, n.atoms[0]) || (e && e.ok.has('v') ? 'sv' : null);
+    };
     // T. compuesto, Pasiva, V. pronominal written where the key says nothing: right only if the words show it
     const verbOk = (id, atoms) => {
       const w = spanWords(atoms);
@@ -5051,7 +5073,7 @@ window.S.addES({
         if (t.k === 'class') st = classV(x.id, x.u.atoms) === 'bad' ? 'bad' : 'neutral';
         else if (t.k === 'verb') st = !keyKinds.has('verb') && verbOk(x.id, x.u.atoms) ? 'neutral' : 'bad';
         else if (t.k === 'info') st = t.grp && keyGrps.has(t.grp) ? 'bad' : infoOk(x.id, ks, x.u.atoms) ? 'neutral' : 'bad';
-        else if (t.k === 'phrase') st = keyKinds.has('phrase') ? 'bad' : phraseOk(x.id, x.u.atoms) ? 'neutral' : 'bad';
+        else if (t.k === 'phrase') st = keyKinds.has('phrase') ? 'bad' : phraseOk(x.id, x.u.atoms) || ks.some((k) => groupOfLine(k) === x.id) ? 'neutral' : 'bad';
         else if (x.id === 'n' && x.u.atoms.length === 1) st = nOk(x.u.atoms[0], ks) ? 'neutral' : 'bad';
         else if (t.k === 'clause' && simplifiedOk(ks, x.id)) st = 'neutral';
         termState[tkey(x.u, x.id)] = st;
@@ -5065,7 +5087,9 @@ window.S.addES({
         else if (need.some((q) => q.st === 'ok' || q.st === 'partial') || mine.some((q) => q.st === 'partial')) keyStatus[k.id] = 'partial';
         else keyStatus[k.id] = need.length ? 'missing' : 'ok';
       });
-      const correct = S.fmtLabel(Array.from(new Set(ks.flatMap((k) => S.learnedIds(sent, k, known)))));
+      // a key line with no group name (from Claude): name the group its words show, «(SN) Suj» rather than «Suj»
+      const inferred = keyKinds.has('phrase') ? null : ks.map(groupOfLine).find(Boolean);
+      const correct = S.fmtLabel(Array.from(new Set((inferred ? [inferred] : []).concat(ks.flatMap((k) => S.learnedIds(sent, k, known))))));
       const missingTerms = reqs.filter((q) => q.st === 'missing' && required.has(q.k.id)).map((q) => shownId(q.k, q.r));
       us.forEach((u) => {
         const sts = u.terms.map((id) => termState[tkey(u, id)]);
@@ -6627,7 +6651,17 @@ window.S.addES({
     return id;
   }
 
+  // for whoever runs the site: what is missing, in the browser console (students only see a short message)
+  const HINT = {
+    unreachable: 'the function «revisar» could not be reached. In Supabase → Edge Functions: deploy it with that exact name, and turn JWT verification off.',
+    key: 'the function works, but the secret ANTHROPIC_API_KEY is missing (Edge Functions → Secrets).',
+    counter: 'the function works, but the daily counter is missing: run supabase/setup.sql in the SQL Editor.',
+  };
+  const hint = (k) => console.warn('[subrayalo] Claude check: ' + (HINT[k] || k));
+
   // input: {sentence, words, lines: [{text, label}], lang} → {key, cls, notes}; errors carry a code
+  // codes: offline (no internet), unreachable (the function is missing, refuses the call, or blocks this address),
+  // setup (it answers but isn't set up), limit, too_long, busy, invalid_json, error
   S.aiCheck = async (input, opts) => {
     let r;
     try {
@@ -6638,7 +6672,11 @@ window.S.addES({
         signal: opts && opts.signal,
       });
     } catch (e) {
-      throw { code: e && e.name === 'AbortError' ? 'cancelled' : 'offline' };
+      if (e && e.name === 'AbortError') throw { code: 'cancelled' };
+      // the browser gives no reason; with internet on, the call itself was refused
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) throw { code: 'offline' };
+      hint('unreachable');
+      throw { code: 'unreachable' };
     }
     let data = null;
     try {
@@ -6646,8 +6684,15 @@ window.S.addES({
     } catch (e) {
       // not JSON: the function is missing or failed
     }
-    if (!data || !data.ok) throw { code: (data && data.code) || (r.status === 404 ? 'setup' : 'error') };
-    return data.out;
+    if (data && data.ok) return data.out;
+    // Supabase itself answering: no such function (404) or JWT verification still on (401)
+    if ([401, 403, 404].includes(r.status) && !(data && typeof data.code === 'string' && data.ok === false)) {
+      hint('unreachable');
+      throw { code: 'unreachable' };
+    }
+    const code = (data && typeof data.code === 'string' && data.code) || 'error';
+    if (code === 'setup') hint((data && data.detail) || 'key');
+    throw { code };
   };
 })();
 
@@ -9088,6 +9133,7 @@ Notation:
 - A label is term ids joined by ":" (suj:sn, cd:oss, cn:osr, ccl:sprep). Use "," for two jobs on the same words (nx,suj for a relative pronoun that is also the subject).
 - Put the whole sentence inside one top bracket: osimple or ocomp.
 - Mark the subject (suj) and the predicate (pv or pn) of every clause; the verb is n inside pv or pn; inside phrases mark det, n, ady, e, t; mark nexos with nx (a relative or interrogative word gets nx plus its function).
+- Every phrase or clause that has a function also gets its group, even a single word: suj:sn, pv:sv, pn:sv, cd:sn, ci:sprep, atrib:sadj, t:sn, cd:oss. The predicate is always pv:sv or pn:sv.
 - If the subject splits the predicate, give both parts the same tag: [pv#1 …] [suj:sn …] [pv#1 …].
 - For «del» and «al» write de+ l and a+ l so the preposition and the article can be marked.
 - Allowed term ids: ${ids}
@@ -9139,7 +9185,7 @@ Reply with only JSON: {"key": "[ocomp …]", "cls": ["g-comp", "…"], "notes": 
       });
       const key = parsed.lines
         .map((k) => {
-          const reqs = k.reqs.map((r) => ({ alts: r.alts.filter((a) => S.T[a] && S.T[a].k !== 'tag'), opt: r.opt })).filter((r) => r.alts.length);
+          const reqs = S.aiReqs(k.reqs);
           const pieces = k.pieces.map(([a, b]) => [map[a], map[b]]).filter(([a, b]) => a && b);
           return Object.assign({}, k, { reqs, pieces });
         })
@@ -9160,6 +9206,8 @@ Reply with only JSON: {"key": "[ocomp …]", "cls": ["g-comp", "…"], "notes": 
       else if (code === 'limit') ui.ai = { state: 'error', msg: S._('You have used today’s checks. Come back tomorrow.') };
       else if (code === 'too_long') ui.ai = { state: 'error', msg: S._('This sentence is too long for Claude to check.') };
       else if (code === 'offline') ui.ai = { state: 'error', msg: S._('No connection. Check the internet and try again.') };
+      else if (code === 'unreachable') ui.ai = { state: 'error', msg: S._('Claude’s check isn’t switched on for this website yet.') };
+      else if (code === 'setup') ui.ai = { state: 'error', msg: S._('Claude’s check isn’t fully set up on this website yet.') };
       else if (code === 'mismatch' || code === 'invalid_json') ui.ai = { state: 'error', msg: 'Claude’s answer could not be matched to your sentence. Try again.' };
       else ui.ai = { state: 'error', msg: 'Claude could not answer right now. Try again.' };
       renderPanel();
