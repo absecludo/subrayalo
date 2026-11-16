@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%23f8f4ec%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2260%22%20text-anchor%3D%22middle%22%20fill%3D%22%231c1915%22%3Es%3C/text%3E%3Crect%20x%3D%2212%22%20y%3D%2251%22%20width%3D%2240%22%20height%3D%225%22%20rx%3D%222.5%22%20fill%3D%22%231c1915%22/%3E%3C/svg%3E">
-<meta name="theme-color" content="#f8f4ec">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%230f1a36%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2260%22%20text-anchor%3D%22middle%22%20fill%3D%22%23f6f2e7%22%3Es%3C/text%3E%3Crect%20x%3D%2212%22%20y%3D%2251%22%20width%3D%2240%22%20height%3D%225%22%20rx%3D%222.5%22%20fill%3D%22%23d5b064%22/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0f1a36">
 <meta property="og:title" content="subrayalo.com">
 <meta property="og:description" content="Analiza oraciones subrayando con el ratón, practica con corrección al momento, escribe las tuyas y repasa toda la teoría de sintaxis.">
 <meta property="og:type" content="website">
@@ -1306,6 +1306,335 @@ a.preset { color: inherit; text-decoration: none; }
   .presets { grid-template-columns: minmax(0, 1fr); }
   .page-h { margin-bottom: 24px; }
 }
+/* the check of a sentence outside the bank: a small spinner while it works */
+.spin { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid var(--pen-2); border-top-color: var(--pen); animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-wait { font-weight: 600; }
+
+/* ===== Editor, phase 2 ===== */
+/* fingers: lines and their end handles never scroll the page, and are easier to hit */
+.lg .ln, .lg .hd { touch-action: none; }
+@media (pointer: coarse) {
+  .lg .ln { height: 26px; margin-top: -13px; }
+  .lg .ln::after { top: 12px; }
+  .lg.sel .ln::after { top: 11.5px; }
+  .lg.drop .ln::after { top: 13px; }
+  .lg .hd { width: 18px; height: 18px; margin: -9px 0 0 -9px; }
+  .lg .hd::before { content: ""; position: absolute; inset: -11px; border-radius: 50%; }
+}
+/* wide screens: the correction sits beside the drawing instead of on top of it */
+@media (min-width: 1180px) {
+  .ed { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr); }
+  .ed-top { grid-column: 1 / -1; }
+  .ed-stage { grid-column: 1; grid-row: 2; }
+  .ed-panel { grid-column: 2; grid-row: 2; align-self: start; width: 384px; max-height: calc(100% - 22px); margin: 8px calc(max(10px, env(safe-area-inset-right, 0px)) + 64px) 0 0; }
+  .ed:has(.ed-panel:not([hidden])) .ed-stage { padding-right: 20px; }
+  .ed-panel-h { padding: 12px 12px 10px 16px; gap: 8px 10px; }
+  .ed-panel-h .legend { order: 5; flex-basis: 100%; }
+}
+
+/* ===== Phase 3: finish and desktop layout =====
+   One soft shadow scale, a pen-blue rule before every page label (the site's underline, in small),
+   buttons and cards that answer the pointer, and pages that use the whole column on a computer. */
+:root { --shadow-1: 0 1px 2px rgba(58, 44, 22, 0.05), 0 3px 10px rgba(58, 44, 22, 0.045); --shadow-2: 0 2px 4px rgba(58, 44, 22, 0.06), 0 12px 28px rgba(58, 44, 22, 0.1); }
+:root[data-look="dark"] { --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4); --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.45), 0 14px 30px rgba(0, 0, 0, 0.45); }
+
+/* header: the page shows through a little while it scrolls underneath */
+@media (min-width: 761px) {
+  .top { background: color-mix(in srgb, var(--paper) 86%, transparent); -webkit-backdrop-filter: saturate(1.5) blur(12px); backdrop-filter: saturate(1.5) blur(12px); }
+}
+/* narrower windows and tablets: icons only on the right, so nothing is cut off */
+@media (max-width: 1180px) {
+  .side-b .hb-t { display: none; }
+  .side-b { width: 40px; padding: 0; justify-content: center; }
+  .side-b.acct-b { width: auto; padding: 0 11px 0 9px; }
+  .side-b.acct-b.in { width: 40px; padding: 0; border: 0; }
+  .acct-b .ab-long { display: none; }
+  .acct-b .ab-short { display: inline; }
+  .side { padding-left: 10px; }
+}
+
+/* page headers */
+.page-h .eyebrow { display: flex; align-items: center; gap: 10px; }
+.page-h .eyebrow::before { content: ""; flex: none; width: 26px; height: 2px; border-radius: 2px; background: var(--pen); }
+.h1 { letter-spacing: -0.015em; }
+.h2 { letter-spacing: -0.005em; }
+
+/* buttons */
+.btn { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 2px rgba(27, 58, 158, 0.28); transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease, border-color 0.12s ease, background 0.12s ease; }
+.btn:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 4px 12px rgba(27, 58, 158, 0.26); }
+.btn:active { transform: none; filter: brightness(0.96); }
+.btn.quiet, .btn.ghost { background: var(--card); box-shadow: var(--shadow-1); }
+.btn.quiet:hover, .btn.ghost:hover { box-shadow: var(--shadow-2); filter: none; }
+.btn.ghost:hover { background: var(--pen-2); }
+.btn[disabled], .btn[disabled]:hover { transform: none; box-shadow: none; }
+:root[data-look="dark"] .btn { color: #0b0a08; }
+:root[data-look="dark"] .btn.quiet { color: var(--ink); }
+:root[data-look="dark"] .btn.ghost { color: var(--pen); }
+
+/* cards: the same paper, the same soft shadow */
+.card, .side-card, .preset, .tc, .frc, .opts .opt { box-shadow: var(--shadow-1); }
+.preset, a.card, .opts .opt { transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease; }
+.preset:hover, a.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
+.opts .opt { background: var(--card); border-radius: 12px; padding: 14px 16px; font-size: 17px; }
+.opts .opt.right { background: var(--ok-2); }
+.opts .opt.wrong { background: var(--bad-2); }
+.opts .opt:hover:not([disabled]) { box-shadow: var(--shadow-2); }
+.opts .opt[disabled] { box-shadow: none; }
+.sbox-in { border-color: var(--rule); }
+.syl-a { border-radius: 10px; padding-inline: 8px; transition: background 0.12s ease; }
+.syl-a:hover .syl-t b { color: var(--pen-ink); }
+
+@media (min-width: 1100px) {
+  /* Teoría: the topics of each part in two columns, read down the first, then the second */
+  .syl-list { display: block; columns: 2; column-gap: 56px; border-top: 0; }
+  .syl-it { break-inside: avoid; border-bottom: 0; border-top: 1px solid var(--rule); }
+  .syl-a { grid-template-columns: 38px minmax(0, 1fr); }
+  .syl-meta { grid-column: 2; flex-direction: row; align-items: center; gap: 10px; text-align: left; }
+  .syl-g { margin-top: 40px; }
+  /* Redactar: the model frases side by side */
+  .red2:has(.frcs) { max-width: none; }
+  .frcs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  /* Mapa: the whole column */
+  .mapa { max-width: none; }
+}
+
+/* ===== Phase 4: phones =====
+   The four sections sit at the bottom, under the thumb. In the editor the tools are one row at the bottom
+   (the sentence gets the whole width), with the check button always in view. */
+@media (max-width: 760px) {
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; order: 0; width: auto; margin: 0; gap: 0; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: var(--paper); padding: 5px max(6px, env(safe-area-inset-right, 0px)) calc(5px + env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px)); box-shadow: 0 -6px 18px rgba(58, 44, 22, 0.06); }
+  .tabbar a { height: 52px; font-size: 12.5px; border-radius: 16px; }
+  .tb-pill { border-radius: 16px; }
+  .top-in { padding-block: 6px; }
+  main { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); }
+  body[data-route="inicio"] main { padding-block: 10px calc(env(safe-area-inset-bottom, 0px) + 76px); }
+  .toast { bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); }
+}
+@media (max-width: 640px) {
+  .ed-top { min-height: 48px; gap: 2px; padding-right: 60px; align-items: center; }
+  .ed-exit { padding: 10px; }
+  .ed-exit span { display: none; }
+  .ed-task { display: block; font-size: 14px; line-height: 1.3; }
+  .ed-task b { margin-right: 6px; }
+  .ed-task span { color: var(--ink-3); }
+  .ed-task { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .ed-stage { padding-right: max(8px, env(safe-area-inset-right, 0px)); }
+  .ed-rail { position: static; transform: none; order: 5; flex: none; flex-direction: row; align-items: center; gap: 2px; width: 100%; max-height: none; border: 0; border-top: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 5px max(8px, env(safe-area-inset-right, 0px)) calc(5px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .ed-rail::-webkit-scrollbar { display: none; }
+  .ed-rail .sep { flex: none; width: 1px; height: 24px; margin: 0 4px; }
+  .rb { flex: none; width: 40px; height: 44px; }
+  .rb[data-act="keys"] { display: none; }
+  /* first what is used all the time (tools, undo, hint); the rest follows when the row is slid sideways */
+  .ed-rail .sep ~ .sep ~ .sep { order: 59; }
+  .rb.nokb { order: 60; }
+  .rb[data-act="export"] { order: 61; }
+  .rb[data-act="settings"] { order: 62; }
+  /* the check button: always in view at the right end, filled */
+  .rb[data-act="check"], .rb[data-act="ai"], .rb[data-act="try"] { position: sticky; right: 0; order: 99; margin-left: auto; width: 52px; background: var(--pen); color: #fff; box-shadow: -10px 0 10px -2px var(--paper); }
+  .rb[data-act="check"]:hover, .rb[data-act="ai"]:hover, .rb[data-act="try"]:hover { background: var(--pen); color: #fff; }
+  .rb[data-act="check"][aria-pressed="true"] { background: var(--pen-ink); color: #fff; }
+  :root[data-look="dark"] .rb[data-act="check"], :root[data-look="dark"] .rb[data-act="ai"], :root[data-look="dark"] .rb[data-act="try"] { color: #0b0a08; }
+  .ed-panel { order: 4; width: calc(100% - 16px); margin: 0 8px 6px; max-height: 44vh; }
+  .mk-colors { position: fixed; top: auto !important; right: auto; left: 8px; bottom: calc(env(safe-area-inset-bottom, 0px) + 62px); flex-direction: row; z-index: 9; }
+}
+/* a phone held sideways: the tool rail scrolls instead of running off the screen */
+@media (min-width: 641px) and (max-height: 600px) {
+  .ed-rail { top: 54px; transform: none; max-height: calc(100% - 62px); overflow-y: auto; scrollbar-width: none; }
+  .ed-rail .rb, .ed-rail .sep { flex: none; }
+}
+/* fingers: bigger targets for the small controls */
+@media (pointer: coarse) {
+  .chip { padding: 7px 13px; }
+  .sr-btns .linkbtn { padding: 10px 6px; }
+  .btn.sm { height: 40px; padding: 0 14px; }
+  .ctag button { width: 28px; height: 28px; }
+  .nt-b { width: 40px; height: 40px; }
+  .nt-pill { height: 40px; }
+  .frc-more summary, .set-more summary { padding-block: 8px; }
+}
+
+/* =====================================================================================
+   Theme 2 · ink, paper and gold
+   A dark-ink header and footer, a lighter page with white cards, navy buttons, gold details.
+   The analysis keeps its pen blue. The home page windows keep their own colours (pinned below),
+   so their animations look exactly as before.
+   ===================================================================================== */
+:root {
+  --paper: #faf8f3; --paper-2: #f0ece1; --card: #ffffff;
+  --ink: #131a2e; --ink-2: #434c61; --ink-3: #727a8c; --rule: #e2ddd0;
+  --pen: #2443c9; --pen-2: #e8ecfb; --pen-ink: #1b3099;
+  --navy: #0f1a36; --navy-2: #1b2a55; --on-navy: #f6f2e7; --on-navy-2: rgba(246, 242, 231, 0.74);
+  --gold: #b98f3e; --gold-hi: #d5b064; --gold-2: #f5ecd6; --gold-ink: #876414;
+  --btn: #16224a; --btn-fg: #fdfbf5;
+  --shadow: 0 1px 2px rgba(19, 26, 46, 0.06), 0 12px 32px rgba(19, 26, 46, 0.1);
+  --shadow-1: 0 1px 2px rgba(19, 26, 46, 0.05), 0 4px 14px rgba(19, 26, 46, 0.05);
+  --shadow-2: 0 2px 4px rgba(19, 26, 46, 0.06), 0 14px 30px rgba(19, 26, 46, 0.12);
+}
+:root[data-look="dark"] {
+  --paper: #0d111a; --paper-2: #151a27; --card: #121724; --ink: #eceef4; --ink-2: #bcc2d0; --ink-3: #8a91a3; --rule: #262d3e;
+  --pen: #8fa9ff; --pen-2: #1c2545; --pen-ink: #b3c4ff;
+  --navy: #080b13; --navy-2: #1a2440; --on-navy: #f1ede2; --on-navy-2: rgba(241, 237, 226, 0.72);
+  --gold: #d2ae60; --gold-hi: #dcbb72; --gold-2: #2a2212; --gold-ink: #e1c37c;
+  --btn: #e9ebf3; --btn-fg: #0d111a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+/* the home page windows: their own palette, as it always was */
+.hw { --paper: #f8f4ec; --paper-2: #efe9dc; --card: #fffdf8; --ink: #1c1915; --ink-2: #4a4339; --ink-3: #776d60; --rule: #e2d9c8; --pen: #2247c2; --pen-2: #e6eaf5; --pen-ink: #1b3a9e; --shadow: 0 1px 2px rgba(58, 44, 22, 0.07), 0 10px 30px rgba(58, 44, 22, 0.1); }
+:root[data-look="dark"] .hw { --paper: #15130f; --paper-2: #1d1b16; --card: #1a1814; --ink: #eee9df; --ink-2: #c2baac; --ink-3: #958c7e; --rule: #302c25; --pen: #8fa9ff; --pen-2: #1d2440; --pen-ink: #afc1ff; --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 12px 32px rgba(0, 0, 0, 0.5); }
+
+/* ---------- header: dark ink, the logo underlined in gold ---------- */
+body::before { background: var(--navy); }
+.top, .top:not(#x) { background: var(--navy); border-bottom: 0; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 0 8px 24px rgba(15, 26, 54, 0.14); --brand-line: var(--gold-hi); }
+.brand { color: var(--on-navy); }
+.brand-tld { color: var(--gold-hi); }
+.side { border-left-color: rgba(255, 255, 255, 0.14); }
+.side-b { color: var(--on-navy-2); }
+.side-b .ic { color: rgba(246, 242, 231, 0.62); }
+.side-b:hover, .side-b[aria-current="page"] { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.side-b:hover .ic, .side-b[aria-current="page"] .ic { color: var(--gold-hi); }
+.side-b.acct-b, .side-b.acct-b.in { border-color: rgba(255, 255, 255, 0.28); color: var(--on-navy); }
+.side-b.acct-b .ic { color: var(--gold-hi); }
+.side-b.acct-b:hover { border-color: var(--gold-hi); background: rgba(255, 255, 255, 0.1); color: #fff; }
+.top :focus-visible { outline-color: var(--gold-hi); }
+@media (min-width: 761px) {
+  .tabbar { background: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.1); }
+  .tabbar a { color: var(--on-navy-2); }
+  .tabbar a .ic { color: rgba(246, 242, 231, 0.5); }
+  .tabbar a:hover, .tabbar a[aria-current="page"] { color: #fff; }
+  .tabbar a[aria-current="page"] .ic { color: var(--gold-hi); }
+  .tb-pill { background: rgba(255, 255, 255, 0.13); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1); }
+  .tb-pill.on { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 -2px 0 var(--gold-hi); }
+}
+/* phones: the bottom bar is light, the section you are in is tinted */
+@media (max-width: 760px) {
+  .tabbar { background: var(--card); box-shadow: 0 -6px 18px rgba(19, 26, 46, 0.07); }
+  .tabbar a[aria-current="page"] { color: var(--pen-ink); }
+  .tb-pill, .tb-pill.on { background: var(--pen-2); box-shadow: none; }
+}
+
+/* ---------- buttons: ink; the pen blue stays for the analysis and for links ---------- */
+.btn { background: var(--btn); border-color: var(--btn); color: var(--btn-fg); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(15, 26, 54, 0.3); }
+.btn:hover { filter: none; background: var(--navy-2); border-color: var(--navy-2); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 16px rgba(15, 26, 54, 0.25); }
+:root[data-look="dark"] .btn:hover { background: #fff; border-color: #fff; }
+.btn.quiet, .btn.quiet:hover { background: var(--card); border-color: var(--rule); color: var(--ink); }
+.btn.quiet:hover { border-color: var(--ink-3); }
+.btn.ghost, .btn.ghost:hover { background: var(--card); border-color: var(--pen); color: var(--pen-ink); }
+.btn.ghost:hover { background: var(--pen-2); }
+.btn.quiet.danger { color: var(--bad); }
+.btn[disabled], .btn[disabled]:hover { background: var(--btn); border-color: var(--btn); }
+.btn.quiet[disabled], .btn.quiet[disabled]:hover { background: var(--card); border-color: var(--rule); }
+
+/* ---------- page header: a band of darker paper across the whole window ---------- */
+main > .page-h:first-child, main > :first-child > .page-h:first-child {
+  margin-top: -36px; margin-bottom: 36px; padding: 46px 0 36px; gap: 14px;
+  background: var(--paper-2); box-shadow: 0 0 0 100vmax var(--paper-2), 0 1px 0 100vmax var(--rule); clip-path: inset(0 -100vmax -1px -100vmax);
+}
+.page-h .eyebrow { color: var(--gold-ink); letter-spacing: 0.14em; }
+.page-h .eyebrow::before { background: var(--gold); width: 30px; }
+.page-h .h1 { font-size: clamp(36px, 4.6vw, 54px); }
+.page-h .lede { font-size: 19.5px; }
+.page-h .prac-search { margin: 12px 0 0; max-width: 780px; }
+.page-h .sbox-in { border-color: transparent; box-shadow: 0 1px 2px rgba(19, 26, 46, 0.08), 0 10px 28px rgba(19, 26, 46, 0.1); padding: 8px 8px 8px 16px; border-radius: 16px; }
+.page-h .sbox-in:focus-within { border-color: var(--pen); }
+.red2 .page-h { margin-bottom: 22px; }
+@media (max-width: 640px) {
+  main > .page-h:first-child, main > :first-child > .page-h:first-child { margin-top: -22px; margin-bottom: 26px; padding: 28px 0 24px; }
+}
+
+/* ---------- Práctica ---------- */
+.presets { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 40px; }
+@media (max-width: 1000px) { .presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .presets { grid-template-columns: minmax(0, 1fr); margin-bottom: 30px; } }
+.preset { position: relative; padding: 20px 22px 22px; border-radius: 16px; gap: 8px; }
+.preset b { font-family: var(--f-sent); font-size: 22px; font-weight: 500; line-height: 1.15; }
+.preset::after { content: "→"; position: absolute; right: 18px; top: 16px; color: var(--ink-3); font-size: 18px; transition: transform 0.15s ease, color 0.15s ease; }
+.preset:hover::after { transform: translateX(3px); color: var(--pen); }
+.preset b { padding-right: 26px; }
+.preset.main, .preset.main:hover { background: var(--navy); border-color: var(--navy); color: var(--on-navy); }
+.preset.main span { color: var(--on-navy-2); }
+.preset.main::after, .preset.main:hover::after { color: var(--gold-hi); }
+:root[data-look="dark"] .preset.main, :root[data-look="dark"] .preset.main:hover { background: var(--navy-2); border-color: var(--navy-2); }
+.mqs { margin-top: 12px; padding: 4px 20px; border: 1px solid var(--rule); border-radius: 16px; background: var(--card); box-shadow: var(--shadow-1); }
+.mq:last-child { border-bottom: 0; }
+.mq { padding: 12px 0; }
+.mq-q { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--gold-2); color: var(--gold-ink); }
+.rm { border-radius: 16px; box-shadow: var(--shadow-1); padding: 18px 22px; }
+.side-card { border-radius: 16px; }
+.side-card > b { font-family: var(--f-sent); font-size: 22px; font-weight: 500; }
+.sess > .quiz, .sess > .ed-card { background: var(--card); border: 1px solid var(--rule); border-radius: 20px; padding: 30px 34px 32px; box-shadow: var(--shadow-1); }
+@media (max-width: 640px) { .sess > .quiz, .sess > .ed-card { padding: 20px 18px 22px; border-radius: 16px; } }
+
+/* ---------- Teoría: each part is a sheet, numbered ---------- */
+.syl { counter-reset: part; }
+.syl-g { counter-increment: part; margin-top: 26px; padding: 26px 30px 16px; border: 1px solid var(--rule); border-radius: 20px; background: var(--card); box-shadow: var(--shadow-1); }
+.syl-g:first-of-type { margin-top: 0; }
+.syl-gh { align-items: center; }
+.syl-gh::before { content: counter(part); flex: none; width: 42px; height: 42px; margin-right: 2px; border-radius: 50%; display: grid; place-items: center; background: var(--navy); color: var(--gold-hi); font-family: var(--f-sent); font-size: 23px; line-height: 1; }
+:root[data-look="dark"] .syl-gh::before { background: var(--navy-2); }
+.syl-gd { margin-bottom: 10px; }
+.syl-a:hover { background: var(--paper); }
+.syl-num { background: var(--paper); }
+@media (max-width: 640px) { .syl-g { padding: 18px 14px 8px; border-radius: 16px; } }
+.toc { padding: 14px 10px; border: 1px solid var(--rule); border-radius: 16px; background: var(--card); box-shadow: var(--shadow-1); max-height: calc(100vh - 104px); overflow-y: auto; scrollbar-width: thin; }
+.toc a:hover { background: var(--paper); }
+.tc { border-radius: 16px; }
+
+/* ---------- Mapa: each part on its own sheet ---------- */
+.map-g { margin-top: 22px; padding: 22px 26px 10px; border: 1px solid var(--rule); border-radius: 20px; background: var(--card); box-shadow: var(--shadow-1); }
+.map-g > .h3 { font-family: var(--f-sent); font-size: 24px; font-weight: 500; margin-bottom: 10px; }
+.map-g .mqs { border: 0; box-shadow: none; padding: 0; background: none; }
+.mn-dot { background: var(--card); }
+.map-big { color: var(--ink); }
+@media (max-width: 640px) { .map-g { padding: 16px 12px 6px; border-radius: 16px; } }
+
+/* ---------- small things in gold ---------- */
+.frc-n { background: var(--gold-2); color: var(--gold-ink); }
+.progress i { background: var(--gold); }
+::selection { background: var(--gold-2); color: var(--ink); }
+
+/* ---------- footer ---------- */
+.foot { margin-top: 0; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 30px max(16px, env(safe-area-inset-left, 0px)) 34px; background: var(--navy); color: var(--on-navy-2); }
+body[data-route="inicio"] .foot { display: none; }
+.foot-in { max-width: 1120px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 28px; }
+.foot-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.foot-logo { position: relative; padding-bottom: 2px; font-family: var(--f-sent); font-size: 24px; font-weight: 500; color: var(--on-navy); }
+.foot-logo i { font-style: normal; color: var(--gold-hi); }
+.foot-logo::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: var(--gold-hi); }
+.foot-tag { font-size: 16px; font-style: italic; }
+.foot-nav { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.foot-nav a { color: var(--on-navy-2); text-decoration: none; font-size: 15.5px; font-weight: 600; padding: 4px 0; }
+.foot-nav a:hover { color: #fff; text-decoration: underline; text-decoration-color: var(--gold-hi); text-underline-offset: 5px; }
+/* the footer sits at the bottom of the window on short pages */
+body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
+main { flex: 1 0 auto; width: 100%; }
+.page-h .map-top { margin: 8px 0 0; }
+.page-h .map-key { margin: 0; }
+@media (max-width: 760px) {
+  main { padding-bottom: 44px; }
+  .foot { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); }
+  .foot-nav { display: none; }
+}
+
+/* ---------- the editor: the same dark bar on top, the sheet below ---------- */
+.ed-top { background: var(--navy); color: var(--on-navy-2); padding-block: calc(env(safe-area-inset-top, 0px) + 8px) 8px; min-height: 52px; }
+.ed-exit { color: var(--on-navy-2); }
+.ed-exit:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.ed-task { color: var(--on-navy-2); }
+.ed-task b { color: var(--on-navy); }
+.ed-task span { color: var(--on-navy-2); }
+.nt-pill { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.22); color: var(--on-navy); }
+.nt-pill:hover { border-color: var(--gold-hi); color: #fff; }
+.nt-pill[aria-expanded="true"] { background: var(--gold-hi); border-color: var(--gold-hi); color: #131a2e; }
+.nt-dot { background: var(--gold-hi); }
+.nt { top: calc(env(safe-area-inset-top, 0px) + 9px); }
+.nt-win { top: 50px; }
+@media (max-width: 640px) {
+  .ed-top { min-height: 58px; }
+  .nt { top: calc(env(safe-area-inset-top, 0px) + 9px); }
+  .nt-win, .nt[data-size="big"] .nt-win { top: calc(env(safe-area-inset-top, 0px) + 66px); }
+}
+@media (min-width: 1180px) { .ed-panel { margin-top: 14px; } }
 </style>
 </head>
 <body>
@@ -1327,6 +1656,14 @@ a.preset { color: inherit; text-decoration: none; }
   </div>
 </header>
 <main id="view" tabindex="-1"></main>
+<footer class="foot">
+  <div class="foot-in">
+    <p class="foot-brand"><span class="foot-logo">subrayalo<i>.com</i></span><span class="foot-tag" data-i18n="Sintaxis, step by step.">La sintaxis, paso a paso.</span></p>
+    <nav class="foot-nav" aria-label="Secciones" data-i18n-label="Sections">
+      <a href="#tu-oracion">Tu oración</a><a href="#practica">Práctica</a><a href="#teoria">Teoría</a><a href="#frase-aleatoria">Frase aleatoria</a><a href="#mapa">Mapa</a>
+    </nav>
+  </div>
+</footer>
 
 <div class="ed" id="ed" hidden>
   <div class="ed-top">
@@ -2822,7 +3159,7 @@ window.S.addES({
  "Your sentence · it has a solution": "Tu oración · tiene solución",
  "Your sentence": "Tu oración",
  "Analyze it, then press Check to compare with the solution.": "Analízala y pulsa Comprobar para compararla con la solución.",
- "Analyze it yourself: there is no automatic solution. Ask Claude to check it when you are done.": "Analízala tú: no hay solución automática. Pide a Claude que la revise cuando termines.",
+ "Analyze it yourself. When you are done, press Check my analysis.": "Analízala tú. Cuando termines, pulsa Comprobar mi análisis.",
  "Analyze it yourself: there is no automatic solution. Your work saves itself.": "Analízala tú: no hay solución automática. Tu trabajo se guarda solo.",
  "Write it": "Escríbela",
  "Type or paste the sentence and press Analyze.": "Escribe o pega la oración y pulsa Analizar.",
@@ -2841,11 +3178,11 @@ window.S.addES({
  "Search by topic": "Buscar por tema",
  "How checking works": "Cómo funciona la corrección",
  "A sentence from the bank gets an automatic check against its solution.": "Una oración del banco se corrige automáticamente con su solución.",
- "Any other sentence: press the sparkle button and Claude checks it (it can make mistakes).": "Cualquier otra oración: pulsa el botón de destellos y Claude la revisa (puede equivocarse).",
+ "Any other sentence: press the check button and it is checked automatically (it can make mistakes).": "Cualquier otra oración: pulsa el botón de comprobar y se corrige automáticamente (puede equivocarse).",
  "Your own sentences can be drawn and saved; the automatic check needs the bank.": "Tus propias oraciones se pueden dibujar y guardar; la corrección automática necesita el banco.",
  "Lines can go in any order and at any height; the check only looks at the words and the labels.": "Las líneas pueden ir en cualquier orden y a cualquier altura; la corrección solo mira las palabras y las etiquetas.",
  "This sentence is in the bank: Check will compare it with its solution.": "Esta oración está en el banco: Comprobar la comparará con su solución.",
- "Not in the bank: you can ask Claude to check it.": "No está en el banco: puedes pedir a Claude que la revise.",
+ "Not in the bank: it can still be checked automatically.": "No está en el banco: también se puede corregir automáticamente.",
  "Not in the bank: you analyze it yourself, without an automatic check.": "No está en el banco: la analizas tú, sin corrección automática.",
  "Analysis deleted.": "Análisis borrado.",
  "Delete?": "¿Borrar?",
@@ -2870,10 +3207,10 @@ window.S.addES({
  "Write a sentence with this structure:": "Escribe una oración con esta estructura:",
  "{k} of {n} checks passed.": "{k} de {n} comprobaciones superadas.",
  "Sentences that work": "Oraciones que funcionan",
- "Ask Claude if mine is right": "Preguntar a Claude si la mía está bien",
+ "Check if mine is right": "Comprobar si la mía está bien",
  "Done": "Hecho",
  "The checks only look for the pieces of the structure; they can’t judge whether the whole sentence is right.": "Las comprobaciones solo buscan las piezas de la estructura; no pueden juzgar si toda la oración está bien.",
- "Claude can.": "Claude sí puede.",
+ "The full check can.": "La corrección completa sí.",
  "results": "resultados",
  "1 question": "1 pregunta",
  "{n} questions": "{n} preguntas",
@@ -2912,12 +3249,12 @@ window.S.addES({
  "Nothing practised yet. Your average per topic shows up here.": "Aún no has practicado nada. Tu media por tema aparecerá aquí.",
  "Write a sentence first.": "Escribe primero una oración.",
  "Mistakes again": "Errores otra vez",
- "Claude is checking your sentence…": "Claude está revisando tu oración…",
+ "Checking your sentence…": "Comprobando tu oración…",
  "It fits.": "Encaja.",
  "Corrected:": "Corregida:",
- "Claude can make mistakes.": "Claude puede equivocarse.",
+ "The automatic check can make mistakes.": "La corrección automática puede equivocarse.",
  "Too many requests right now. Try again in a minute.": "Demasiadas peticiones ahora mismo. Vuelve a intentarlo en un minuto.",
- "Claude could not answer this time.": "Claude no ha podido responder esta vez.",
+ "The check is not available this time.": "La corrección no está disponible esta vez.",
  "A topic: «sustantivas», «O. simple con PV», «CRV»…": "Un tema: «sustantivas», «O. simple con PV», «CRV»…",
  "Search sentences by topic": "Buscar oraciones por tema",
  "Search": "Buscar",
@@ -3104,7 +3441,7 @@ window.S.addES({
  "Start underlining": "Empezar a subrayar",
  "Another sentence": "Otra oración",
  "You have used today’s checks. Come back tomorrow.": "Ya has usado las revisiones de hoy. Vuelve mañana.",
- "This sentence is too long for Claude to check.": "Esta oración es demasiado larga para que Claude la revise.",
+ "This sentence is too long to check automatically.": "Esta oración es demasiado larga para corregirla automáticamente.",
  "No connection. Check the internet and try again.": "Sin conexión. Revisa internet y vuelve a intentarlo.",
  "Play the animation": "Ver la animación",
  "Pause the animations": "Pausar las animaciones",
@@ -3112,8 +3449,8 @@ window.S.addES({
  "More sentences, with other topics inside": "Más oraciones, con otros temas dentro",
  "Log in / Sign up": "Entrar / Registrarse",
  "Under the sentence: write O. simple or O. compuesta and the sujeto omitido. The rest (modality, transitive…) is optional and doesn’t change your score.": "Debajo de la oración: escribe O. simple u O. compuesta y el sujeto omitido. Lo demás (modalidad, transitiva…) es opcional y no cambia tu nota.",
- "Claude’s check isn’t switched on for this website yet.": "La revisión de Claude todavía no está activada en esta web.",
- "Claude’s check isn’t fully set up on this website yet.": "La revisión de Claude todavía no está configurada del todo en esta web.",
+ "The automatic check isn’t switched on for this website yet.": "La corrección automática todavía no está activada en esta web.",
+ "The automatic check isn’t fully set up on this website yet.": "La corrección automática todavía no está configurada del todo en esta web.",
  "Back": "Volver",
  "Start here": "Empieza aquí",
  "Every topic in order →": "Todos los temas en orden →",
@@ -3314,20 +3651,20 @@ window.S.addES({
  "Tap to choose": "Toca para elegir",
  "Ask Claude to check": "Pedir a Claude que lo corrija",
  "Grey dashed lines are extra detail that «Main lines» doesn’t ask for (E, T, Ady, Cuant…).": "Las líneas grises discontinuas son detalle extra que «Líneas principales» no pide (E, T, Ady, Cuant…).",
- "Claude’s solution (it can contain mistakes)": "Solución de Claude (puede tener errores)",
+ "Solution (automatic: it can contain mistakes)": "Solución (automática: puede tener errores)",
  "Everything you drew is right.": "Todo lo que has dibujado está bien.",
- "Checked against Claude’s analysis. It is usually right, but it can contain mistakes.": "Corregido con el análisis de Claude. Suele acertar, pero puede tener errores.",
+ "Automatic check. It is usually right, but it can contain mistakes.": "Corrección automática: suele acertar, pero puede tener errores.",
  "Show the list": "Mostrar la lista",
  "Extra detail: «Main lines» doesn’t ask for this line.": "Detalle extra: «Líneas principales» no pide esta línea.",
  "Nothing is missing at this depth. Press Check.": "A este nivel no falta nada. Pulsa Comprobar.",
  "Analyze the whole sentence, then press Check.": "Analiza la oración entera y luego pulsa Comprobar.",
  "(no label)": "(sin etiqueta)",
  "(no lines yet)": "(todavía no hay líneas)",
- "Asking Claude is not allowed for this page.": "Esta página no puede preguntar a Claude.",
- "Claude’s answer could not be matched to your sentence. Try again.": "La respuesta de Claude no encaja con tu oración. Vuelve a probar.",
- "Claude could not answer right now. Try again.": "Claude no ha podido responder ahora. Vuelve a probar.",
+ "The automatic check is not allowed on this page.": "Esta página no puede usar la corrección automática.",
+ "The check could not be matched to your sentence. Try again.": "La corrección no encaja con tu oración. Vuelve a probar.",
+ "The check is not available right now. Try again.": "La corrección no está disponible ahora. Vuelve a probar.",
  "The image could not be saved here.": "Aquí no se ha podido guardar la imagen.",
- "Claude is analyzing the sentence…": "Claude está analizando la oración…",
+ "Analyzing the sentence and checking your answers…": "Analizando la oración y comprobando tus respuestas…",
  "Long sentences": "Oraciones largas",
  "Compound sentences": "Oraciones compuestas",
  "Simple sentences": "Oraciones simples",
@@ -3339,11 +3676,11 @@ window.S.addES({
  "The right answer is in green next to each red gap.": "La respuesta correcta está en verde junto a cada hueco en rojo.",
  "See the result": "Ver el resultado",
  "The right answers are in green next to the red gaps.": "Las respuestas correctas están en verde junto a los huecos en rojo.",
- "Ask Claude for feedback": "Pedir a Claude que lo corrija",
+ "Get feedback": "Pedir una corrección",
  "Write your answer first.": "Primero escribe tu respuesta.",
- "Claude is reading your answer…": "Claude está leyendo tu respuesta…",
- "Claude is not available here.": "Claude no está disponible aquí.",
- "Claude could not answer this time. Try again later.": "Claude no ha podido responder esta vez. Vuelve a probar más tarde.",
+ "Reading your answer…": "Leyendo tu respuesta…",
+ "Feedback is not available here.": "La corrección no está disponible aquí.",
+ "Feedback is not available right now. Try again later.": "La corrección no está disponible ahora. Vuelve a probar más tarde.",
  "Every frase is there.": "Están todas las frases.",
  "Now compare the details with the model.": "Ahora compara los detalles con el modelo.",
  "Back to the frases": "Volver a las frases",
@@ -3782,6 +4119,29 @@ window.S.addES({
     return r;
   };
   S.parseTag = (str) => parseWith(tagPat, tagMax, str);
+
+  /* A label as it was typed, with the usual capitals: «det» → «Det», «(sn) suj» → «(SN) Suj».
+     Only the capitals change, never the letters; words we don't know stay as they are. */
+  const CASE = {};
+  const CASE1 = {};
+  T.filter((t) => !['tag'].includes(t.k)).forEach((t) => {
+    [t.ab].concat(t.a || []).forEach((x, i) => {
+      const k = String(x || '').toLowerCase();
+      if (!k) return;
+      if (!(k in CASE)) CASE[k] = x;
+      // single words: the short form always, an alias only when it is longer than one letter
+      if (!/\s/.test(k) && (i === 0 || k.length > 1) && !(k in CASE1)) CASE1[k] = x;
+    });
+  });
+  S.tidyLabel = (str) => {
+    const v = String(str || '');
+    if (!v || v !== v.toLowerCase()) return v; // capitals were typed on purpose: leave it
+    if (CASE[v]) return CASE[v];
+    return v
+      .split(/([\s()·+\/,]+)/)
+      .map((w) => (CASE1[w] && CASE1[w].toLowerCase() === w ? CASE1[w] : w))
+      .join('');
+  };
 
   // ancestors of a term (parent chain)
   S.ancestors = (id) => {
@@ -6553,6 +6913,11 @@ window.S.addES({
         x = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
         y = r.bottom + 8;
       }
+      // no room below (a tool row at the bottom of the screen): above it
+      if (y + h > innerHeight - 6) {
+        x = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+        y = r.top - h - 8;
+      }
       tip.style.left = x + 'px';
       tip.style.top = y + 'px';
     });
@@ -7151,6 +7516,7 @@ window.S.addES({
 
   const set = () => S.store.d.settings;
   const isPhone = () => innerWidth < 640;
+  const coarse = () => !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   const editable = () => ctx && ctx.mode !== 'walk' && !ui.showKey;
   const getLine = (id) => st.lines.find((l) => l.id === id);
   const getTok = (id) => st.tokens.find((t) => t.id === id);
@@ -7171,6 +7537,18 @@ window.S.addES({
       S.AC.render();
     });
     el.lbIn.addEventListener('keydown', (e) => {
+      // Ctrl+Z in a label box where nothing has been typed yet undoes the drawing itself
+      // (a line drawn by mistake goes away at once)
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && ui && ui.editing) {
+        const ln = getLine(ui.editing);
+        if (ln && el.lbIn.value === (ln.label || '')) {
+          e.preventDefault();
+          e.stopPropagation();
+          commitLabel(true);
+          doUndo();
+          return;
+        }
+      }
       if (S.AC.key(e)) {
         e.preventDefault();
         e.stopPropagation();
@@ -7247,6 +7625,11 @@ window.S.addES({
     el.clsIn.addEventListener('blur', () => setTimeout(() => S.AC.input === el.clsIn && document.activeElement !== el.clsIn && S.AC.close(), 0));
 
     el.edCanvas.addEventListener('pointerdown', onDown);
+    // after a finger tap the browser also sends a mouse click: it must not take the focus (and the keyboard)
+    // away from the label box that the tap has just opened
+    el.edCanvas.addEventListener('mousedown', (e) => {
+      if (e.target !== el.lbIn && !e.target.closest('.cls')) e.preventDefault();
+    });
     addEventListener('pointermove', onMove);
     addEventListener('pointerup', onUp);
     addEventListener('pointercancel', onCancel);
@@ -7280,6 +7663,17 @@ window.S.addES({
         layout();
       }
     });
+    // the stage gets narrower or wider when the side panel opens or closes: fit the sentence again
+    if (window.ResizeObserver) {
+      let lastW = 0;
+      new ResizeObserver(() => {
+        const w = el.edStage.clientWidth;
+        if (!ctx || el.ed.hidden || G || w === lastW) return;
+        lastW = w;
+        measureDirty = true;
+        layout();
+      }).observe(el.edStage);
+    }
     el.edRail.addEventListener('click', onRail);
     el.edPanel.addEventListener('click', onPanel);
     if (S.Notes) S.Notes.mount(el.ed);
@@ -7542,8 +7936,9 @@ window.S.addES({
     let h = lastBelow + 30;
     if (showCls()) {
       el.edCls.hidden = false;
-      const left = Math.max(g.padX, sentX);
+      // as wide as the sentence (at least 360px when there is room), centred under it, never off the canvas
       const width = Math.min(canvasW - 2 * g.padX, Math.max(g.sentW, 360));
+      const left = S.clamp(sentX + (g.sentW - width) / 2, g.padX, canvasW - g.padX - width);
       el.edCls.style.left = left + 'px';
       el.edCls.style.width = width + 'px';
       el.edCls.style.top = lastBelow + 22 + 'px';
@@ -7552,6 +7947,9 @@ window.S.addES({
     } else el.edCls.hidden = true;
     el.edCanvas.style.width = canvasW + 'px';
     el.edCanvas.style.height = h + 'px';
+    // nothing to scroll sideways: sideways finger moves belong to the editor (underlining), not to the browser
+    geo.scrollX = canvasW > g.stageW + 1;
+    el.edCanvas.style.touchAction = geo.scrollX ? '' : 'pan-y';
     drawOverlay();
     if (ui.editing) placeInput();
     if (ui.picking) placePick();
@@ -7631,7 +8029,8 @@ window.S.addES({
       const cx = best ? (best[0] + best[1]) / 2 : 0;
       const top = d.side === 'below' ? y + 4 : y - 4 - geo.labelH;
       labels.push({ lb, cx, w, top, key: d.y != null ? 'y' + d.id : d.side + (d.row || 1) + (d.cls && d.cls.includes('hidden') ? 'h' : '') });
-      gEl.querySelectorAll('.hd').forEach((h) => h.remove());
+      // the end handles: kept (not rebuilt) from one drawing to the next, so a finger that is dragging one
+      // keeps talking to the element it touched
       if (d.handles) {
         const first = xs[0];
         const last = xs[xs.length - 1];
@@ -7639,13 +8038,16 @@ window.S.addES({
           ['a', first && first[0]],
           ['b', last && last[1]],
         ].forEach(([end, x]) => {
-          if (x == null) return;
-          const hd = S.h('div.hd', { 'data-end': end, 'aria-hidden': 'true' });
+          let hd = gEl.querySelector(`.hd[data-end="${end}"]`);
+          if (x == null) return hd && hd.remove();
+          if (!hd) {
+            hd = S.h('div.hd', { 'data-end': end, 'aria-hidden': 'true' });
+            gEl.append(hd);
+          }
           hd.style.left = x + 'px';
           hd.style.top = y + 'px';
-          gEl.append(hd);
         });
-      }
+      } else gEl.querySelectorAll('.hd').forEach((h) => h.remove());
     });
     const rows = {};
     labels.forEach((l) => (rows[l.key] = rows[l.key] || []).push(l));
@@ -7875,9 +8277,11 @@ window.S.addES({
     const g = geo;
     const src = base || st.lines;
     // on the words, or close to them (a finger lands a little above): the usual side, next to the others
+    // (a NEW line only: a line that is being dragged lands where it is dropped, so a small sideways move
+    // of the hand never reorders the lines under a word)
     const band = Math.max(8, Math.min(18, (g.sentH || 30) * 0.45));
-    if (y >= g.textTop - band && y <= g.textBottom + band) return S.lay.smartSlot(st.tokens, src, set().side, hull, excludeId);
-    const side = y < g.textTop ? 'above' : 'below';
+    if (!excludeId && y >= g.textTop - band && y <= g.textBottom + band) return S.lay.smartSlot(st.tokens, src, set().side, hull, excludeId);
+    const side = y < (excludeId ? (g.textTop + g.textBottom) / 2 : g.textTop) ? 'above' : 'below';
     const lines = src.filter((l) => l.id !== excludeId);
     const R = S.lay.rowsOf(lines, side);
     const cands = [];
@@ -7920,6 +8324,7 @@ window.S.addES({
     if (!ctx || (e.button != null && e.button > 0)) return;
     if (ui.editing) commitLabel();
     if (ui.picking) closePick();
+    if (document.activeElement === el.clsIn) el.clsIn.blur();
     S.popClose();
     const p = xy(e);
     const gapb = e.target.closest('.gapb');
@@ -8048,7 +8453,13 @@ window.S.addES({
       if (G.type === 'touch') {
         if (dist > 10) {
           clearTimeout(G.timer);
-          G = null;
+          // the sentence fits on the screen: a sideways swipe underlines at once (no need to hold first).
+          // A sentence that has to be scrolled sideways keeps the swipe for scrolling: hold, then drag.
+          if (!geo.scrollX && Math.abs(p.x - G.x0) > Math.abs(p.y - G.y0)) {
+            G.lx = p.x;
+            G.ly = p.y;
+            beginDraw();
+          } else G = null;
         }
         return;
       }
@@ -8154,6 +8565,7 @@ window.S.addES({
     if (g.mode === 'move') {
       const ln = getLine(g.id);
       if (g.slot && ln && g.base) {
+        const was = JSON.stringify(st.lines);
         pushUndo();
         // the others take the rows they had without it; then it lands, and only its column makes room
         const base = {};
@@ -8162,6 +8574,8 @@ window.S.addES({
           if (l !== ln && base[l.id] != null) l.row = base[l.id];
         });
         S.lay.apply(st.lines, ln, g.slot, st.tokens);
+        // put back where it was: nothing to undo
+        if (JSON.stringify(st.lines) === was) undoS.pop();
         changed();
       } else place();
       return;
@@ -8545,7 +8959,7 @@ window.S.addES({
     place();
     el.lbIn.value = ln.label || '';
     el.lbIn.hidden = false;
-    el.lbIn.style.fontSize = geo.lfs + 'px';
+    el.lbIn.style.fontSize = (coarse() ? Math.max(16, geo.lfs) : geo.lfs) + 'px';
     placeInput();
     el.lbIn.focus({ preventScroll: true });
     el.lbIn.select();
@@ -8559,7 +8973,7 @@ window.S.addES({
   }
 
   function sizeInput() {
-    el.lbIn.style.width = Math.max(96, (el.lbIn.value.length + 3) * geo.lfs * 0.62) + 'px';
+    el.lbIn.style.width = Math.max(96, (el.lbIn.value.length + 3) * (coarse() ? Math.max(16, geo.lfs) : geo.lfs) * 0.62) + 'px';
   }
 
   function placeInput() {
@@ -8582,7 +8996,7 @@ window.S.addES({
     el.lbIn.hidden = true;
     if (S.AC.input === el.lbIn) S.AC.close();
     if (!ln) return;
-    const v = el.lbIn.value.replace(/\s+/g, ' ').trim();
+    const v = S.tidyLabel(el.lbIn.value.replace(/\s+/g, ' ').trim());
     if (v !== ln.label) {
       if (justCreated !== id) pushUndo();
       ln.label = v;
@@ -8854,6 +9268,9 @@ window.S.addES({
         ui.sel = null;
         return place();
       }
+      // one Esc too many must not throw the drawing away: in an exercise (nothing saves it) Esc only leaves
+      // while nothing has been drawn; after that, «Back» is the way out
+      if (!ctx.onSave && ctx.mode !== 'walk' && undoS.length && st.lines.length) return S.toast(S.L('To leave, press «Back». Your drawing isn’t saved here.', 'Para salir, pulsa «Volver». Aquí tu dibujo no se guarda.'), 2600);
       return E.close();
     }
     if (ctx.mode === 'walk') {
@@ -8957,7 +9374,7 @@ window.S.addES({
         // pressed while the correction shows: pressing it again goes back to editing
         B.push(btn('check', 'check', ui.check ? 'Keep editing' : 'Check my analysis', { cls: 'primary', pressed: !!ui.check }));
         B.push(btn('solution', 'eye', ui.showKey ? 'Back to my analysis' : 'Show the solution', { pressed: ui.showKey }));
-      } else if (S.sample || S.aiCheck) B.push(btn('ai', 'sparkle', 'Ask Claude to check', { cls: 'primary' }));
+      } else if (S.sample || S.aiCheck) B.push(btn('ai', 'check', 'Check my analysis', { cls: 'primary' }));
     } else B.push(btn('try', 'pencil', 'Try it yourself'));
     B.push('<div class="sep"></div>');
     if (S.downloads) B.push(btn('export', 'download', 'Save as image'));
@@ -9054,7 +9471,7 @@ window.S.addES({
     if (ctx.mode === 'walk') return renderWalk();
     if (ui.ai && ui.ai.state === 'busy') {
       p.hidden = false;
-      p.innerHTML = `<div class="ed-panel-h"><span>${S.icon('sparkle', 18)}</span><b>Claude is analyzing the sentence…</b><span class="grow"></span><button type="button" class="btn sm quiet" data-act="ai-stop">Stop</button></div>`;
+      p.innerHTML = `<div class="ed-panel-h"><span class="spin" aria-hidden="true"></span><b class="ai-wait">Analyzing the sentence and checking your answers…</b><span class="grow"></span><button type="button" class="btn sm quiet" data-act="ai-stop">Stop</button></div>`;
       return;
     }
     if (ui.ai && ui.ai.state === 'error') {
@@ -9066,7 +9483,7 @@ window.S.addES({
       p.hidden = false;
       const softN = softKeys().size;
       const notes = goodToKnow(ui.keySent) + (softN ? ['<p class="opt-note">Grey dashed lines are extra detail that «Main lines» doesn’t ask for (E, T, Ady, Cuant…).</p>'] : []).concat((ui.keySent.notes || []).map((n) => `<p>${S.esc(n)}</p>`)).join('');
-      p.innerHTML = `<div class="ed-panel-h"><b>${ui.keySent.ai ? 'Claude’s solution (it can contain mistakes)' : 'The solution'}</b><span class="grow"></span><button type="button" class="btn sm" data-act="solution">Back to my analysis</button></div>${notes ? `<div class="ed-panel-b">${notes}</div>` : ''}`;
+      p.innerHTML = `<div class="ed-panel-h"><b>${ui.keySent.ai ? 'Solution (automatic: it can contain mistakes)' : 'The solution'}</b><span class="grow"></span><button type="button" class="btn sm" data-act="solution">Back to my analysis</button></div>${notes ? `<div class="ed-panel-b">${notes}</div>` : ''}`;
       return;
     }
     if (ui.check) {
@@ -9076,7 +9493,7 @@ window.S.addES({
       const issues = r.issues.length
         ? r.issues.map((i) => `<div class="iss ${i.kind}" data-line="${i.line || ''}" data-key="${i.key || ''}"><i></i><div>${issBody(i)}</div></div>`).join('')
         : '<p>Everything you drew is right.</p>';
-      const aiNote = ui.keySent.ai ? '<p class="small muted" style="margin:6px 0 4px">Checked against Claude’s analysis. It is usually right, but it can contain mistakes.</p>' : '';
+      const aiNote = ui.keySent.ai ? '<p class="small muted" style="margin:6px 0 4px">Automatic check. It is usually right, but it can contain mistakes.</p>' : '';
       const perfect = r.score.pct === 100;
       const showNext = ctx.onNext && (ctx.nextWhen !== 'perfect' || perfect || ui.peeked);
       const next = showNext ? `<button type="button" class="btn sm${perfect ? ' go-next' : ''}" data-act="next">${S.esc(ctx.nextLabel || 'Next')}${ctx.nextWhen === 'perfect' ? ' ' + S.icon('next', 14) : ''}</button>` : '';
@@ -9356,17 +9773,17 @@ Reply with only JSON: {"key": "[ocomp …]", "cls": ["g-comp", "…"], "notes": 
       const code = e && e.code;
       if (code === 'cancelled') ui.ai = null;
       else if (code === 'not_granted' || code === 'sampling_disabled') {
-        ui.ai = { state: 'error', msg: 'Asking Claude is not allowed for this page.' };
+        ui.ai = { state: 'error', msg: 'The automatic check is not allowed on this page.' };
         S.sample = null;
         renderRail();
       } else if (code === 'rate_limited' || code === 'busy') ui.ai = { state: 'error', msg: 'Too many requests right now. Try again in a minute.' };
       else if (code === 'limit') ui.ai = { state: 'error', msg: S._('You have used today’s checks. Come back tomorrow.') };
-      else if (code === 'too_long') ui.ai = { state: 'error', msg: S._('This sentence is too long for Claude to check.') };
+      else if (code === 'too_long') ui.ai = { state: 'error', msg: S._('This sentence is too long to check automatically.') };
       else if (code === 'offline') ui.ai = { state: 'error', msg: S._('No connection. Check the internet and try again.') };
-      else if (code === 'unreachable') ui.ai = { state: 'error', msg: S._('Claude’s check isn’t switched on for this website yet.') };
-      else if (code === 'setup') ui.ai = { state: 'error', msg: S._('Claude’s check isn’t fully set up on this website yet.') };
-      else if (code === 'mismatch' || code === 'invalid_json') ui.ai = { state: 'error', msg: 'Claude’s answer could not be matched to your sentence. Try again.' };
-      else ui.ai = { state: 'error', msg: 'Claude could not answer right now. Try again.' };
+      else if (code === 'unreachable') ui.ai = { state: 'error', msg: S._('The automatic check isn’t switched on for this website yet.') };
+      else if (code === 'setup') ui.ai = { state: 'error', msg: S._('The automatic check isn’t fully set up on this website yet.') };
+      else if (code === 'mismatch' || code === 'invalid_json') ui.ai = { state: 'error', msg: 'The check could not be matched to your sentence. Try again.' };
+      else ui.ai = { state: 'error', msg: 'The check is not available right now. Try again.' };
       renderPanel();
     }
   }
@@ -12664,7 +13081,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
       text,
       doc: rec ? rec.doc : null,
       title: bankSent ? _('Your sentence · it has a solution') : _('Your sentence'),
-      task: { instruction: bankSent ? _('Analyze it, then press Check to compare with the solution.') : S.sample || S.aiCheck ? _('Analyze it yourself: there is no automatic solution. Ask Claude to check it when you are done.') : _('Analyze it yourself: there is no automatic solution. Your work saves itself.') },
+      task: { instruction: bankSent ? _('Analyze it, then press Check to compare with the solution.') : S.sample || S.aiCheck ? _('Analyze it yourself. When you are done, press Check my analysis.') : _('Analyze it yourself: there is no automatic solution. Your work saves itself.') },
       onSave: (doc) => {
         const has = (doc.lines || []).length || (doc.cls || []).length || Object.keys(doc.marks || {}).length;
         if (!has && !work.analyses[id]) return;
@@ -12706,7 +13123,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
       const v = ta.value.trim();
       if (!v) return (note.textContent = '');
       const b = S.findInBank(v);
-      note.textContent = b ? _('This sentence is in the bank: Check will compare it with its solution.') : S.sample || S.aiCheck ? _('Not in the bank: you can ask Claude to check it.') : _('Not in the bank: you analyze it yourself, without an automatic check.');
+      note.textContent = b ? _('This sentence is in the bank: Check will compare it with its solution.') : S.sample || S.aiCheck ? _('Not in the bank: it can still be checked automatically.') : _('Not in the bank: you analyze it yourself, without an automatic check.');
     };
     ta.addEventListener('input', upd);
     ta.addEventListener('keydown', (e) => {
@@ -13114,7 +13531,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
           </details>
           <div class="row">
             <button type="button" class="btn" data-w="compare">Compare with the model</button>
-            ${S.sample ? '<button type="button" class="btn quiet" data-w="ai">' + S.icon('sparkle', 16) + ' Ask Claude for feedback</button>' : ''}
+            ${S.sample ? '<button type="button" class="btn quiet" data-w="ai">' + S.icon('check', 16) + ' Get feedback</button>' : ''}
           </div>
           <div data-wout></div>
         </div>
@@ -13153,7 +13570,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
     if (!S.sample) return;
     if (R.ai.ctl) R.ai.ctl.abort();
     R.ai.ctl = new AbortController();
-    out.innerHTML = '<p class="small muted">Claude is reading your answer…</p>';
+    out.innerHTML = '<p class="small muted">Reading your answer…</p>';
     const prompt = [
       S.isEs()
         ? 'You are a Spanish secondary-school teacher (Lengua castellana, ESO and Bachillerato) marking a student\'s written syntactic analysis. Write all your feedback in clear, simple Castellano (Spanish), quoting the student\'s words in «».'
@@ -13168,15 +13585,15 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
       const r = await S.sample.json(prompt, { signal: R.ai.ctl.signal, modelTier: 'default' });
       if (!out.isConnected) return;
       const li = (a) => (Array.isArray(a) ? a : []).map((x) => `<li>${esc(String(x))}</li>`).join('');
-      out.innerHTML = `<div class="ai-out" style="white-space:normal"><p><b>${esc(String(r.score != null ? r.score : '?'))} / 10</b> · ${S.L('Claude’s feedback (it can make mistakes)', 'Comentarios de Claude (puede equivocarse)')}</p>${r.good && r.good.length ? `<p style="margin-top:8px"><b>${S.L('Good', 'Bien')}</b></p><ul class="tips">${li(r.good)}</ul>` : ''}${r.fix && r.fix.length ? `<p style="margin-top:8px"><b>${S.L('To fix', 'Para corregir')}</b></p><ul class="tips">${li(r.fix)}</ul>` : ''}${r.better ? `<p style="margin-top:8px"><b>${S.L('Better:', 'Mejor:')}</b> <span class="es-block">${esc(String(r.better))}</span></p>` : ''}</div>`;
+      out.innerHTML = `<div class="ai-out" style="white-space:normal"><p><b>${esc(String(r.score != null ? r.score : '?'))} / 10</b> · ${S.L('Feedback (automatic: it can make mistakes)', 'Corrección (automática: puede tener errores)')}</p>${r.good && r.good.length ? `<p style="margin-top:8px"><b>${S.L('Good', 'Bien')}</b></p><ul class="tips">${li(r.good)}</ul>` : ''}${r.fix && r.fix.length ? `<p style="margin-top:8px"><b>${S.L('To fix', 'Para corregir')}</b></p><ul class="tips">${li(r.fix)}</ul>` : ''}${r.better ? `<p style="margin-top:8px"><b>${S.L('Better:', 'Mejor:')}</b> <span class="es-block">${esc(String(r.better))}</span></p>` : ''}</div>`;
     } catch (e) {
       if (!out.isConnected) return;
       const code = e && e.code;
       if (code === 'not_granted') {
         S.sample = null;
-        out.innerHTML = '<p class="small muted">Claude is not available here.</p>';
+        out.innerHTML = '<p class="small muted">Feedback is not available here.</p>';
       } else if (code === 'aborted' || (e && e.name === 'AbortError')) out.innerHTML = '';
-      else out.innerHTML = `<p class="small muted">${code === 'rate_limited' ? 'Too many requests right now. Try again in a minute.' : 'Claude could not answer this time. Try again later.'}</p>`;
+      else out.innerHTML = `<p class="small muted">${code === 'rate_limited' ? 'Too many requests right now. Try again in a minute.' : 'Feedback is not available right now. Try again later.'}</p>`;
     }
   }
 
@@ -13716,8 +14133,8 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
       ${done ? `<div class="feedback ${it.res.pct >= 99 ? 'ok' : 'no'}"><b>${esc(_('{k} of {n} checks passed.', { k: checks.filter((c) => c.ok).length, n: checks.length }))}</b>${esc(_(item.why))}</div>
         <div class="stack" style="gap:6px"><b class="small">${esc(_('Sentences that work'))}</b><div class="models">${item.models.map((x) => `<span>${esc(x)}</span>`).join('')}</div></div>
         <div data-bai></div>
-        <div class="row">${S.sample ? `<button type="button" class="btn quiet" data-p="bai">${S.icon('sparkle', 16)} ${esc(_('Ask Claude if mine is right'))}</button>` : ''}<button type="button" class="btn" data-p="next">${esc(nextTxt)}</button></div>` : `<div class="row"><button type="button" class="btn" data-p="bdone">${esc(_('Done'))}</button><button type="button" class="btn quiet" data-p="skip">${esc(_('Skip'))}</button></div>`}
-      <p class="small muted">${esc(_('The checks only look for the pieces of the structure; they can’t judge whether the whole sentence is right.'))}${S.sample ? ' ' + esc(_('Claude can.')) : ''}</p>
+        <div class="row">${S.sample ? `<button type="button" class="btn quiet" data-p="bai">${S.icon('check', 16)} ${esc(_('Check if mine is right'))}</button>` : ''}<button type="button" class="btn" data-p="next">${esc(nextTxt)}</button></div>` : `<div class="row"><button type="button" class="btn" data-p="bdone">${esc(_('Done'))}</button><button type="button" class="btn quiet" data-p="skip">${esc(_('Skip'))}</button></div>`}
+      <p class="small muted">${esc(_('The checks only look for the pieces of the structure; they can’t judge whether the whole sentence is right.'))}${S.sample ? ' ' + esc(_('The full check can.')) : ''}</p>
     </div>`;
   }
 
@@ -13765,8 +14182,8 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
     const on = (id) => !sel || sel.has(id);
     const search = S.Search ? S.Search : null;
     const head = `<div class="page-h prac-h"><p class="eyebrow">${esc(_('Práctica'))}</p><h1 class="h1">${esc(S.L('Practice any kind of sentence', 'Practica cualquier tipo de oración'))}</h1>
-        <p class="lede">${esc(_('Search any topic and work through its sentences one after another, or pick an exercise below. Every answer is checked and explained.'))}</p></div>
-      ${search ? `<div class="prac-search">${search.box('prac')}${search.facets.length ? '' : search.popular()}</div>` : ''}`;
+        <p class="lede">${esc(_('Search any topic and work through its sentences one after another, or pick an exercise below. Every answer is checked and explained.'))}</p>
+        ${search ? `<div class="prac-search">${search.box('prac')}${search.facets.length ? '' : search.popular()}</div>` : ''}</div>`;
     if (search && search.facets.length) {
       m.innerHTML = head + search.results();
       return;
@@ -13796,14 +14213,14 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
       })
       .join('');
     m.innerHTML = `${head}
-      <div class="prac">
-        <div class="stack" style="gap:30px">
-          <div class="presets">
+      <div class="presets">
             <button type="button" class="preset main" data-preset="mix"><b>${esc(_('Mixed review'))}</b><span>${esc(_('12 questions in a row, of every kind: whole sentences, subordinadas, perífrasis, «que», impersonales…'))}</span></button>
             <button type="button" class="preset" data-preset="quick"><b>${esc(_('Quick 5'))}</b><span>${esc(_('Five short questions: perífrasis, «que», impersonales, «se»…'))}</span></button>
             <button type="button" class="preset" data-preset="weak"><b>${esc(_('My weak spots'))}</b><span>${esc(toReview ? (toReview === 1 ? _('1 question you missed comes back.') : _('{n} questions you missed come back.', { n: toReview })) : _('The questions you miss come back here.'))}</span></button>
             <a class="preset" href="#redactar"><b>Redactar</b><span>${esc(_('Write the analysis in full sentences with model frases: the same words every time, only the info changes.'))}</span></a>
           </div>
+      <div class="prac">
+        <div class="stack" style="gap:30px">
           <section class="stack" style="gap:6px" aria-labelledby="pq">
             <h2 class="h2" id="pq">${esc(_('One kind of exercise at a time'))}</h2>
             <p class="small muted">${esc(_('Pick the kind of exercise you want to get better at. The bar shows your last five tries.'))}</p>
@@ -13951,7 +14368,7 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
     const box = S.qs('[data-bai]');
     if (!box || !S.sample) return;
     const item = S.quizItem('build', it.id);
-    box.innerHTML = `<p class="small muted">${esc(_('Claude is checking your sentence…'))}</p>`;
+    box.innerHTML = `<p class="small muted">${esc(_('Checking your sentence…'))}</p>`;
     try {
       const r = await S.sample.json(
         [
@@ -13963,11 +14380,11 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
       );
       if (!box.isConnected) return;
       const parts = (Array.isArray(r.parts) ? r.parts : []).map((p) => `<li><span class="es">«${esc(String(p.words || ''))}»</span>: ${esc(String(p.label || ''))}</li>`).join('');
-      box.innerHTML = `<div class="ai-out" style="white-space:normal"><p><b>${esc(r.fits ? _('It fits.') : _('Not quite.'))}</b> ${esc(String(r.why || ''))}</p>${parts ? `<ul class="tips" style="margin-top:6px">${parts}</ul>` : ''}${r.fixed ? `<p style="margin-top:6px"><b>${esc(_('Corrected:'))}</b> <span class="es-block">${esc(String(r.fixed))}</span></p>` : ''}<p class="small muted" style="margin-top:6px">${esc(_('Claude can make mistakes.'))}</p></div>`;
+      box.innerHTML = `<div class="ai-out" style="white-space:normal"><p><b>${esc(r.fits ? _('It fits.') : _('Not quite.'))}</b> ${esc(String(r.why || ''))}</p>${parts ? `<ul class="tips" style="margin-top:6px">${parts}</ul>` : ''}${r.fixed ? `<p style="margin-top:6px"><b>${esc(_('Corrected:'))}</b> <span class="es-block">${esc(String(r.fixed))}</span></p>` : ''}<p class="small muted" style="margin-top:6px">${esc(_('The automatic check can make mistakes.'))}</p></div>`;
     } catch (err) {
       if (!box.isConnected) return;
       if (err && err.code === 'not_granted') S.sample = null;
-      box.innerHTML = `<p class="small muted">${esc(err && err.code === 'rate_limited' ? _('Too many requests right now. Try again in a minute.') : _('Claude could not answer this time.'))}</p>`;
+      box.innerHTML = `<p class="small muted">${esc(err && err.code === 'rate_limited' ? _('Too many requests right now. Try again in a minute.') : _('The check is not available this time.'))}</p>`;
     }
   }
 })();
@@ -15637,12 +16054,12 @@ window.S.BANK_MORE = [{"id": "b-001", "d": 2, "tp": "adj adj-exp", "cls": "g-com
     const next = S.mapNext(nodes);
     m.innerHTML = `<div class="mapa">
       <div class="page-h"><p class="eyebrow">${esc(_('Mapa'))}</p><h1 class="h1">${esc(_('Your map'))}</h1>
-        <p class="lede">${esc(_('Every step from the basics to the mixed review. A step turns green when you get 80% of its quick questions right and solve half of its full examples (“ex 3/6”).'))}</p></div>
+        <p class="lede">${esc(_('Every step from the basics to the mixed review. A step turns green when you get 80% of its quick questions right and solve half of its full examples (“ex 3/6”).'))}</p>
       <div class="map-top">
         <div class="map-sum"><span class="map-big">${done}<small>/${main.length}</small></span><span>${esc(_('steps done'))}<br><span class="muted">${esc(_('{p}% of the way', { p: main.length ? Math.round((100 * done) / main.length) : 0 }))}</span></span></div>
         ${next ? `<a class="btn" ${nodeAttrs(next)}>${esc(_('Continue:'))} ${esc(next.kind === 'topic' ? next.num + '. ' + next.n : next.n)} →</a>` : `<span class="pill ok">${esc(_('Everything done. Do another mixed review.'))}</span>`}
       </div>
-      <div class="map-key small muted"><span><i class="mk done"></i>${esc(_('done'))}</span><span><i class="mk weak"></i>${esc(_('started: not there yet'))}</span><span><i class="mk seen"></i>${esc(_('opened'))}</span><span><i class="mk todo"></i>${esc(_('not yet'))}</span><span><i class="mk cp"></i>${esc(_('put it together'))}</span></div>
+      <div class="map-key small muted"><span><i class="mk done"></i>${esc(_('done'))}</span><span><i class="mk weak"></i>${esc(_('started: not there yet'))}</span><span><i class="mk seen"></i>${esc(_('opened'))}</span><span><i class="mk todo"></i>${esc(_('not yet'))}</span><span><i class="mk cp"></i>${esc(_('put it together'))}</span></div></div>
       ${S.THEORY_GROUPS.map((g) => `<section class="map-g"><h2 class="h3">${esc(g.n)}</h2><div class="map-board" data-board="${g.id}"></div></section>`).join('')}
       <section class="map-g"><h2 class="h3">${esc(_('Kinds of exercise'))}</h2><p class="small muted">${esc(_('Your last five tries of each kind.'))}</p><div class="mqs">${QROWS.map(qRow).join('')}</div></section>
     </div>`;
